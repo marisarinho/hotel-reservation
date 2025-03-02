@@ -1,0 +1,12 @@
+coisas a serem feitas ainda
+fazer metodos 
+    consultar = []
+    cancelar = []
+    listar  = []
+        usar fila para exibir os b primeiros - função de ir e voltar 
+           iter com yield = [] 
+
+lidar com exceção = []
+
+melhorar comunicação entre cliente-servidor com curses = []
+
