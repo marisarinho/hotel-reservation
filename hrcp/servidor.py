@@ -65,14 +65,13 @@ class Servidor:
     def Cancelar():
         pass 
         
-    def consultar_reserva(self,avl, cpf):
-        user = User()
-        resultado = AVLTree.search(user.cpf)  
-    
-        if resultado:
-            print("Reserva encontrada:", resultado)
+    def consultar_reserva(self, cpf):
+        reserva = self.reservas.search(cpf)
+        
+        if reserva:
+            return reserva  
         else:
-            print("Reserva não encontrada.")
+            return None  
 
 
     def lidar_com_cliente(self, conexao, endereco):
