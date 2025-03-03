@@ -61,6 +61,17 @@ class HashTable:
 			current = current.next
 
 		raise KeyError(key) 
+	
+	def get(self, key): 
+		index = self._hash(key) 
+
+		current = self.table[index] 
+		while current: 
+			if current.key == key: 
+				return current.value 
+			current = current.next
+		raise KeyError(key) 
+
 
 	def __len__(self): 
 		return self.size 
