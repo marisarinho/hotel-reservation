@@ -55,12 +55,12 @@ class Servidor:
         Quarto.gerar_quartos(self.hash_quartos)  # Corrigido: agora passa uma instância
 
     def realizar_reserva(self, cpf, num_quarto, periodo):
-        usuario = self.hash_usuarios.get(cpf) if cpf in self.hash_usuarios else None
+        usuario = self.hash_usuarios.get(cpf)
         if not usuario:
             usuario = User(nome="Usuário Padrão", cpf=cpf, telefone="0000-0000")
             self.hash_usuarios.insert(cpf, usuario)
 
-        quarto = self.hash_quartos.get(num_quarto) if num_quarto in self.hash_quartos else None
+        quarto = self.hash_quartos.get(num_quarto)
         if not quarto:
             raise ValueError("Quarto não encontrado!")
 
