@@ -55,7 +55,7 @@ class Servidor:
         Quarto.gerar_quartos(self.hash_quartos)  # Corrigido: agora passa uma instância
 
     def realizar_reserva(self, cpf, num_quarto, periodo):
-        usuario = self.hash_usuarios.get(cpf)
+        usuario = self.hash_usuarios.get(cpf) 
         if not usuario:
             usuario = User(nome="Usuário Padrão", cpf=cpf, telefone="0000-0000")
             self.hash_usuarios.insert(cpf, usuario)
@@ -64,7 +64,7 @@ class Servidor:
         if not quarto:
             raise ValueError("Quarto não encontrado!")
 
-        reservas_existentes = self.arvore_avl_reservas.search(num_quarto)
+        reservas_existentes = self.arvore_avl_reservas.search(num_quarto) 
         if reservas_existentes:
             for reserva in reservas_existentes:
                 if reserva.periodo_conflita(Reserva(quarto, periodo, usuario)):
