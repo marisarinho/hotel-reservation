@@ -40,7 +40,13 @@ class Reserva:
     
     def __eq__(self, other):
         return self.periodo == other.periodo
-
+    
+    def __str__(self):
+        return f"Reserva(quarto={self.quarto}, periodo={self.periodo}, user={self.user})"
+    
+    def __repr__(self):
+        return self.__str__()
+    
     def periodo_conflita(self, outra_reserva):
         return not (self.periodo[1] < outra_reserva.periodo[0] or self.periodo[0] > outra_reserva.periodo[1])
 
@@ -94,7 +100,10 @@ class Servidor:
         reserva = Reserva(quarto, periodo, usuario)
         self.arvore_avl_reservas.add(reserva)
         quarto.disponibilidade = False 
+        print(self.arvore_avl_reservas)
+
         return f"Reserva realizada com sucesso para o quarto {num_quarto}!"
+    
 
     def cancelar_reserva(self, cpf, num_quarto, periodo):
         reservas_existentes = self.arvore_avl_reservas.search(num_quarto)

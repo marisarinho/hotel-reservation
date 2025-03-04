@@ -639,3 +639,25 @@ class AVLTree(object):
         '''
         value = self.search(key)
         return True if value else None
+    
+
+
+
+
+
+    
+    def __str__(self):
+        if self.__root is None:
+            return "Empty AVL Tree"
+        return self.__print_tree(self.__root, "", True)
+
+    def __print_tree(self, node, prefix="", is_tail=True):
+        result = ""
+        if node.right is not None:
+            new_prefix = prefix + ("│   " if is_tail else "    ")
+            result += self.__print_tree(node.right, new_prefix, False)
+        result += prefix + ("└── " if is_tail else "┌── ") + str(node.value) + "\n"
+        if node.left is not None:
+            new_prefix = prefix + ("    " if is_tail else "│   ")
+            result += self.__print_tree(node.left, new_prefix, True)
+        return result
