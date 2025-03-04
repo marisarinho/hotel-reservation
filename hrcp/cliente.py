@@ -9,10 +9,17 @@ class Cliente:
         self.cliente_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.cliente_socket.connect((self.host, self.porta))
 
+    # def enviar_requisicao(self, mensagem):
+    #     self.cliente_socket.send(mensagem.encode())  # f"RESERVAR {cpf} {num_quarto} {periodo}"
+    #     resposta = self.cliente_socket.recv(1024).decode()
+    #     print("Resposta do servidor:", resposta)
+
     def enviar_requisicao(self, mensagem):
-        self.cliente_socket.send(mensagem.encode())  # f"RESERVAR {cpf} {num_quarto} {periodo}"
+        mensagem += "\r\n" # Adiciona o terminador conforme exigido
+        self.cliente_socket.send(mensagem.encode())  
         resposta = self.cliente_socket.recv(1024).decode()
         print("Resposta do servidor:", resposta)
+
 
     def fechar_conexao(self):
         self.cliente_socket.close()
@@ -54,7 +61,10 @@ class Cliente:
             else:
                 print("Opção inválida, tente novamente.")
 
-if __name__ == "__main__":
-    cliente = Cliente()
+
+ 
+if __name__ == "__main__": 
+    porta = int(input("Digite a porta do servidor: "))  # Pergunta ao usuário a porta
+    cliente = Cliente(porta=porta)
     cliente.conectar()
     cliente.menu()

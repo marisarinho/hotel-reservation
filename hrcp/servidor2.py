@@ -55,21 +55,42 @@ class Servidor:
         Quarto.gerar_quartos(self.hash_quartos)  # Corrigido: agora passa uma instância
 
     def realizar_reserva(self, cpf, num_quarto, periodo):
-        usuario = self.hash_usuarios.get(cpf) 
-        if not usuario:
+        # usuario = self.hash_usuarios.get(cpf) 
+        # if not usuario:
+        #     usuario = User(nome="Usuário Padrão", cpf=cpf, telefone="0000-0000")
+        #     self.hash_usuarios.insert(cpf, usuario)
+
+        # quarto = self.hash_quartos.get(num_quarto)
+        # if not quarto:
+        #     raise ValueError("Quarto não encontrado!")
+
+        # reservas_existentes = self.arvore_avl_reservas.search(num_quarto) 
+        # if reservas_existentes:
+        #     for reserva in reservas_existentes:
+        #         if reserva.periodo_conflita(Reserva(quarto, periodo, usuario)):
+        #             raise ValueError(f"O quarto {num_quarto} já está reservado para o período solicitado!")
+        
+        # reserva = Reserva(quarto, periodo, usuario)
+        # self.arvore_avl_reservas.add(reserva)
+        # quarto.disponibilidade = False 
+        # return f"Reserva realizada com sucesso para o quarto {num_quarto}!"
+        usuario = None
+        if self.hash_usuarios.size != 0:
+            usuario = self.hash_usuarios.get(cpf)
+        if usuario == None:
             usuario = User(nome="Usuário Padrão", cpf=cpf, telefone="0000-0000")
             self.hash_usuarios.insert(cpf, usuario)
-
-        quarto = self.hash_quartos.get(num_quarto)
-        if not quarto:
+        quarto = None
+        if self.hash_quartos.size != 0:
+            quarto = self.hash_quartos.get(num_quarto)
+        if  quarto == None:
             raise ValueError("Quarto não encontrado!")
-
         reservas_existentes = self.arvore_avl_reservas.search(num_quarto) 
         if reservas_existentes:
             for reserva in reservas_existentes:
                 if reserva.periodo_conflita(Reserva(quarto, periodo, usuario)):
                     raise ValueError(f"O quarto {num_quarto} já está reservado para o período solicitado!")
-        
+
         reserva = Reserva(quarto, periodo, usuario)
         self.arvore_avl_reservas.add(reserva)
         quarto.disponibilidade = False 
@@ -111,6 +132,9 @@ class Servidor:
                 dados = conexao.recv(1024).decode()
                 if not dados:
                     break
+
+                dados = dados.strip("\r\n")
+                
                 comando = dados.split()
                 resposta = "Comando inválido."
 
@@ -131,5 +155,8 @@ class Servidor:
             except Exception as e:
                 conexao.send(f"Erro: {str(e)}".encode())
 
+
+
 if __name__ == "__main__":
-    Servidor().start()
+    porta = int(input("Digite a porta para o servidor: "))  # Pergunta ao usuário a porta desejada
+    Servidor(porta=porta).start()
