@@ -84,6 +84,16 @@ class HashTable:
 			return False
 
 
+def __str__(self):
+        result = []
+        for i, bucket in enumerate(self.table):
+            if bucket:
+                result.append(f"Índice {i}: " + ", ".join(f"{k}: {v}" for k, v in bucket))
+        return "\n".join(result) if result else "Tabela Hash Vazia"
+
+
+
+
 # Driver code 
 if __name__ == '__main__': 
 
