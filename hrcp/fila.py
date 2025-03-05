@@ -220,7 +220,23 @@ class Fila:
             
         except AssertionError as ae:
             raise FilaError(f'A fila está vazia! Não é possivel remover elementos')
-         
+    
+    def rotacionar(self, n: int):
+        """ Rotaciona a fila em n posições.
+        
+        Se n for positivo, os elementos são movidos para a esquerda.
+        Se n for negativo, os elementos são movidos para a direita.
+        """
+        if self.estaVazia() or abs(n) % self.__tamanho == 0:
+            return  # Se a fila estiver vazia ou n for múltiplo do tamanho, não faz nada
+
+        n = n % self.__tamanho  # Garante que n não seja maior que o tamanho da fila
+
+        for _ in range(n):
+            carga = self.desenfileirar()  # Remove da frente
+            self.enfileirar(carga)  # Adiciona no final
+
+            
     def __str__(self):
         """ Método que retorna uma string com a ordem dos elementos
             existentes na fila.

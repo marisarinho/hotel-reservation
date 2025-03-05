@@ -47,7 +47,7 @@ class Cliente:
                 self.enviar_requisicao(f"CANCELAR {cpf} {num_quarto}")
 
             elif opcao == "3":
-                self.enviar_requisicao("LISTAR_RESERVAS")
+                self.enviar_requisicao(f"LISTAR {fila_reservas}")
 
             elif opcao == "4":
                 cpf = input("Digite seu CPF: ")
