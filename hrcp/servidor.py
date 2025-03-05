@@ -1,7 +1,10 @@
 import socket
-from threading import Thread
-import json
-from avl import AVLTree
+import threading
+from avl import *
+from hashTable import *
+from fila import *
+from datetime import datetime
+
 #ao tentar enviar um obj por tcp(nao da)
 
 
@@ -13,12 +16,21 @@ class User:
 
     def __str__(self):
         return f"{self.nome} {self.cpf} {self.telefone}"
+        
 class Quarto:
     def __init__(self,num_quarto,preco,camas):
         self.num_quarto = num_quarto
         self.disponibilidade = True
         self.preco = preco
         self.camas = camas
+
+    @staticmethod
+    def gerar_quartos(hash_table,quantidade = 20):
+        for i in range(1, quantidade + 1):
+            num_quarto = 100 + i
+            preco = 150 + (i % 3) * 50  # Alterna preços automaticamente
+            camas = (i % 3) + 1  # Alterna entre 1, 2 e 3 camas
+            hash_quarto.insert(num_quarto, Quarto(num_quarto, preco, camas))
 
 
 class Reserva:
@@ -33,100 +45,99 @@ class Reserva:
     def __eq__(self, other):
         return self.periodo == other.periodo
 
+        def periodo_conflita(self, outra_reserva):
+            return not (self.periodo[1] < outra_reserva.periodo[0] or self.periodo[0] > outra_reserva.periodo[1])
+
+   
 
 class Servidor:
-    def __init__(self):
-        self.host = socket.gethostname()
-        self.porta = 10000
-        self.servidor_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.reservas = AVLTree()
-        self.quartos = {}
-        self.quartos_disponiveis = []
+    def __init__(self, host='localhost', porta=12345):
+        self.host = host
+        self.porta = porta
+        self.hash_usuarios = HashTable(capacity=50)
+        self.hash_quartos = HashTable(capacity=25)
+        self.arvore_avl_reservas = AVLTree()
+        self.fila_reservas = Fila()
 
-        reserva = Reserva(101, range(2, 6), 1)
-        self.reservas.add(reserva)
-        self.reservas.search(Reserva(0, range(2, 6), 0))
+    def realizar_reserva(self, cpf, num_quarto, periodo):
+        usuario = self.usuario.get(cpf)
+        if not usuario:
+            raise ValueError("Usuário não encontrado!")
+
+        tabela_quarto = self.hash_quarto.get(num_quarto)
+        if not tabela_quarto:
+            raise ValueError("Quarto não encontrado!")
+        reservas_existentes = self.arvore_avl_reservas.search(num_quarto)  
+        for reserva in reservas_existentes:
+            if reserva.periodo_conflita(Reserva(usuario, num_quarto, periodo)):
+                raise ValueError(f"O quarto {num_quarto} já está reservado para o período solicitado!")
+        reserva = Reserva(usuario, num_quarto, periodo)
+
+
+        self.arvore_avl_reservas.insert(reserva.num_quarto, reserva)
+
+        quarto.disponibilidade = False 
+        print(f"Reserva realizada com sucesso para o quarto {num_quarto}!")
+
+
+    def cancelar(self, cpf, num_quarto, periodo):
+        
+        reservas_existentes = self.arvore_avl_reservas.buscar(num_quarto)
+        for reserva in reservas_existentes:
+            if reserva.usuario.cpf == cpf and reserva.periodo == periodo:
+                # Remover a reserva da árvore AVL e marcar quarto como disponível
+                self.arvore_avl_reservas.remover(num_quarto, reserva)
+                tabela_quarto = self.hash_quartos.search(num_quarto)
+                if tabela_quarto:
+                    quarto.disponibilidade = True
+                print(f"Reserva do quarto {num_quarto} cancelada com sucesso.")
+                return
+        print(f"Nenhuma reserva encontrada para o CPF {cpf} e quarto {num_quarto} no período especificado.")
+
+    def consultar_reserva(self, cpf):
+        # Consultar reservas do usuário
+        reservas = self.arvore_avl_reservas.buscar_por_usuario(cpf)
+        if reservas:
+            for reserva in reservas:
+                print(f"Quarto {reserva.num_quarto} reservado de {reserva.periodo[0]} até {reserva.periodo[1]}")
+        else:
+            print(f"Não há reservas encontradas para o CPF {cpf}.")
 
     def start(self):
-        self.servidor_socket.bind((self.host, self.porta))
-        self.servidor_socket.listen(5)
-
-
-        print(f"Servidor rodando em {self.host}:{self.porta}")
+        servidor_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        servidor_socket.bind((self.host, self.porta))
+        servidor_socket.listen(5)
+        print("Servidor iniciado.")
+        Quarto.gerar_quartos(HashTable)
 
         while True:
-            conexao, endereco = self.servidor_socket.accept()
-            thread_cliente = Thread(target=self.lidar_com_cliente, args=(conexao, endereco))
+            conexao, endereco = servidor_socket.accept()
+            print(f"Cliente conectado: {endereco}")
+            thread_cliente = threading.Thread(target=self.lidar_com_cliente, args=(conexao,))
             thread_cliente.start()
 
-    def quartos_diponiveis(self,periodo) -> list:
-        ... # listar os quartos disponiveis - percorredo a avl reserva 
-
-    def Cancelar():
-        pass 
-        
-    def consultar_reserva(self, cpf):
-        reserva = self.reservas.search(cpf)
-        
-        if reserva:
-            return reserva  
-        else:
-            return None  
-
-
-    def lidar_com_cliente(self, conexao, endereco):
-        print(f"Cliente conectado: {endereco}")
-
-
-        while True:
+    def lidar_com_cliente(self, conexao):
+        if comando[0] == "RESERVAR":
+            cpf, num_quarto, periodo = comando[1], comando[2], comando[3]
             try:
-                mensagem = conexao.recv(1024).decode()
-                mari = User(**json.loads(mensagem.split("__")[1]))
-                print(mari)
-                if not mensagem:
-                    break
+                user = hash_usuarios.search(cpf) 
+                self.realizar_reserva(cpf, num_quarto, periodo) 
+            except KeyError:
+                # Se o usuário não existe, cria automaticamente
+                user = User(cpf=cpf, nome="Nome Padrão", telefone="0000-0000")
+                self.usuarios.insert(cpf, user)  
+                print(f"Usuário {cpf} cadastrado automaticamente.") 
+                self.realizar_reserva(cpf, num_quarto, periodo) 
+        elif comando[0] == "CANCELAR":
+            cpf, num_quarto, periodo = comando[1], comando[2], comando[3]  # Passando parâmetros
+            self.cancelar(cpf, num_quarto, periodo)
+        elif comando[0] == "CONSULTAR":
+            cpf = comando[1]
+            self.consultar_reserva(cpf)
 
-                comando = mensagem.split()
-                resposta = "40 ERRO Comando inválido"  # Padrão de erro
 
-                if comando[0] == "HRCP":
-                    if comando[1] == "CHECK":
-                        id_quarto = comando[2]
-                        if id_quarto in self.quartos_disponiveis and not self.reservas.buscar(id_quarto):
-                            resposta = f"20 OK DISPONIVEL {id_quarto}"
-                        else:
-                            resposta = f"40 ERRO RESERVADO {id_quarto}"
+        elif comando[0] == "SAIR":
+            conexao.close()
 
-                    elif comando[1] == "RESERVE":
-                        id_quarto = comando[2]
-                        nome_cliente = comando[3]
-
-                        if id_quarto in self.quartos_disponiveis:
-                            if self.reservas.add(Reserva(id_quarto, range(10), nome_cliente)):
-                                resposta = f"20 OK Reservation Done"
-                            else:
-                                resposta = f"40 ERRO Could not reserve"
-                        else:
-                            resposta = "40 ERRO Invalid room number"
-
-                    elif comando[1] == "CANCEL":
-                        id_quarto = comando[2]
-
-                        if self.reservas.remover(id_quarto):
-                            resposta = f"20 OK Reservation Canceled"
-                        else:
-                            resposta = f"40 ERRO Reservation Not Found"
-
-                    elif comando[1] == "LIST":
-                        todas_reservas = self.reservas.listar_todos()
-                        resposta = "20 OK LISTA " + " | ".join(f"{k}: {v}" for k, v in todas_reservas.items()) if todas_reservas else "40 ERRO No Reservations Found"
-
-                conexao.send(resposta.encode())
-
-            except Exception as e:
-                print(f"Erro: {e}")
-                conexao.close()
-                break
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     Servidor().start()

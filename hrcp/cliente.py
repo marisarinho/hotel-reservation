@@ -1,66 +1,70 @@
-from listaEnc import Lista
 import socket
-import json
-
-
-class User:
-    def __init__(self, nome, cpf, telefone):
-        self.nome = nome
-        self.cpf = cpf
-        self.telefone = telefone
-
-    def __eq__(self, other: "User") -> bool:
-        return self.cpf == other.cpf
-
-    def __lt__(self, other: "User") -> bool:
-        return self.cpf < other.cpf
-    
-    def __str__(self) -> str:
-        return json.dumps(self.__dict__)
 
 class Cliente:
+    def __init__(self, host='localhost', porta=12345):
+        self.host = host
+        self.porta = porta
 
-    def __init__(self):
-        self.host = socket.gethostname()
-        self.porta = 10000
+    def conectar(self):
         self.cliente_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.lista_reservas = Lista()
-
-    def start(self):
         self.cliente_socket.connect((self.host, self.porta))
 
+    # def enviar_requisicao(self, mensagem):
+    #     self.cliente_socket.send(mensagem.encode())  # f"RESERVAR {cpf} {num_quarto} {periodo}"
+    #     resposta = self.cliente_socket.recv(1024).decode()
+    #     print("Resposta do servidor:", resposta)
+
+    def enviar_requisicao(self, mensagem):
+        mensagem += "\r\n" # Adiciona o terminador conforme exigido
+        self.cliente_socket.send(mensagem.encode())  
+        resposta = self.cliente_socket.recv(1024).decode()
+        print("Resposta do servidor:", resposta)
+
+
+    def fechar_conexao(self):
+        self.cliente_socket.close()
+
+    def menu(self):
         while True:
-            usuario = User("mariana", "283718371", "817382123")
-            print(usuario)
-            self.cliente_socket.send(f"teste__{str(usuario)}".encode())
-            print("\nOpções:")
-            print("""
-                    CHECK <numeroDoQuarto>
-                    RESERVE <numeroDoQuarto> <nome>
-                    CANCEL <numeroDoQuarto>
-                    LIST
-                    QUIT
-            """)
-            opcao =  input("> ").strip().upper()
-            comandos = opcao.split()
+            print("\n--- Sistema de Reservas ---")
+            print("1. Fazer reserva")
+            print("2. Cancelar reserva")
+            print("3. Listar reservas (5 por vez)")
+            print("4. Consultar reserva por CPF")
+            print("5. Sair")
 
-            if not comandos:
-                print("Comando inválido. Tente novamente.")
-                continue
+            opcao = input("Escolha uma opção: ")
 
-            self.cliente_socket.send(f"HRCP {opcao}".encode())
-            resposta = self.cliente_socket.recv(1024).decode()
-            print(f"[Servidor]: {resposta}")
+            if opcao == "1":
+                cpf = input("Digite seu CPF: ")
+                num_quarto = input("Número do quarto: ")
+                periodo = input("Período da reserva (ex: 10-15 Março): ")
+                self.enviar_requisicao(f"RESERVAR {cpf} {num_quarto} {periodo}")
 
-            if comandos[0] == "RESERVE" and resposta.startswith("20 OK"):
-                self.lista_reservas.append(comandos[1])  # Adiciona o quarto na lista local
+            elif opcao == "2":
+                cpf = input("Digite seu CPF: ")
+                num_quarto = input("Número do quarto para cancelar: ")
+                self.enviar_requisicao(f"CANCELAR {cpf} {num_quarto}")
 
-            elif comandos[0] == "CANCEL" and resposta.startswith("20 OK"):
-                self.lista_reservas.remover(comandos[1])  # Remove o quarto da lista local
+            elif opcao == "3":
+                self.enviar_requisicao("LISTAR_RESERVAS")
 
-            elif comandos[0] == "QUIT":
-                self.cliente_socket.close()
+            elif opcao == "4":
+                cpf = input("Digite seu CPF: ")
+                self.enviar_requisicao(f"CONSULTAR {cpf}")
+
+            elif opcao == "5":
+                print("Encerrando conexão...")
+                self.fechar_conexao()
                 break
 
-if __name__ == '__main__':
-    Cliente().start()
+            else:
+                print("Opção inválida, tente novamente.")
+
+
+ 
+if __name__ == "__main__": 
+    porta = int(input("Digite a porta do servidor: "))  # Pergunta ao usuário a porta
+    cliente = Cliente(porta=porta)
+    cliente.conectar()
+    cliente.menu()

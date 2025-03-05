@@ -61,6 +61,17 @@ class HashTable:
 			current = current.next
 
 		raise KeyError(key) 
+	
+	def get(self, key): 
+		index = self._hash(key) 
+
+		current = self.table[index] 
+		while current: 
+			if current.key == key: 
+				return current.value 
+			current = current.next
+		raise KeyError(key) 
+
 
 	def __len__(self): 
 		return self.size 
@@ -71,6 +82,16 @@ class HashTable:
 			return True
 		except KeyError: 
 			return False
+
+
+def __str__(self):
+        result = []
+        for i, bucket in enumerate(self.table):
+            if bucket:
+                result.append(f"Índice {i}: " + ", ".join(f"{k}: {v}" for k, v in bucket))
+        return "\n".join(result) if result else "Tabela Hash Vazia"
+
+
 
 
 # Driver code 
