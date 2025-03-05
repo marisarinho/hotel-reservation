@@ -15,6 +15,9 @@ class Node:
         # attribute that specifies the height (balance factor of the node)
         self.__height = 1
 
+    def __repr__(self):
+        return f'<{self.__value}>'
+
     @property
     def value(self)->object:
         return self.__value
@@ -101,6 +104,8 @@ class AVLTree(object):
         """
         self.__root = None if value is None else self.insert(value)
 
+    def __repr__(self):
+        return f"{self.__root=}"
 
     def getRoot(self)->any:
         '''
@@ -134,6 +139,44 @@ class AVLTree(object):
             return -1
         else:
             return 1 + max(self.__height(root.left), self.__height(root.right))
+
+    def search_all(self, key: any) -> list:
+        """
+        Perform a search in AVL Tree to find all nodes whose key is equal to the "key" argument.
+
+        Returns
+        ----------
+        An empty list if the key was not found or AVL Tree is empty. Otherwise, returns
+        a list of all values stored at the corresponding key nodes.
+        """
+        results = []
+        if self.__root is not None:
+            self.__search_all(key, self.__root, results)
+        return results
+
+    def __search_all(self, key: any, node: Node, results: list):
+        """
+        Private method that performs a recursive search in AVL Tree to find all nodes
+        whose key is equal to "key" argument.
+
+        Arguments
+        ------------
+        key (any): the key value to be searched in AVL Tree
+        node (Node): the node to be used as reference to start the search
+        results (list): list to store found values
+        """
+        if node is None:
+            return
+        
+        if key == node.value:
+            results.append(node.value)
+            self.__search_all(key, node.right, results)
+        
+        if key < node.value:
+            self.__search_all(key, node.left, results)
+        
+        if key > node.value:
+            self.__search_all(key, node.right, results)
 
     def search(self, key:any )->any:
         '''
@@ -255,13 +298,13 @@ class AVLTree(object):
         side). Keys in both of the above trees follow the following order:
         keys(T1) < key(P) < keys(T2) < key(u) < keys(T3).
         So BST property is not violated anywhere
-
-             p                                 u
-            / \                               /  \
-           T1  u                             p    T3 
-              / \     < - - - - - - -       / \  
-             T2 T3    Left Rotation        T1 T2 
         """
+        #     p                                 u
+        #    / \                               /  \
+        #   T1  u                             p    T3 
+        #      / \     < - - - - - - -       / \  
+        #     T2 T3    Left Rotation        T1 T2 
+        
         u = p.right 
         T2 = u.left 
   
@@ -285,15 +328,15 @@ class AVLTree(object):
         T1, T2 and T3 are subtrees of the tree, rooted with p 
         (on the right side). Keys in both of the above trees follow the following order:
         Keys()
-
-        keys(T1) < key(u) < keys(T2) < key(p) < keys(T3).
-        So BST property is not violated anywhere
-             p                               u
-            / \     Right Rotation          /  \
-           u   T3   - - - - - - - >        T1   p 
-          / \                                  / \
-         T1  T2                               T2  T3
         """
+        # keys(T1) < key(u) < keys(T2) < key(p) < keys(T3).
+        # So BST property is not violated anywhere
+        #      p                               u
+        #     / \     Right Rotation          /  \
+        #    u   T3   - - - - - - - >        T1   p 
+        #   / \                                  / \
+        #  T1  T2                               T2  T3
+        
         u = p.left 
         T2 = u.right 
   
@@ -381,53 +424,6 @@ class AVLTree(object):
  
         return self.__getMaxValueNode(root.right)  
 
-    def traversal(self, order:int = None):
-        '''
-        Print the nodes of the in pre-order, in-order or post-order traversal.
-        Arguments
-        ---------
-        order (int): the order of traversal. The possible values are:
-        preorder, inorder, postorder. If no order is given, the traversal
-        is performed in pre-order.
-        '''
-        if order == None:
-            self.__preorder(self.__root)
-        elif order == self.__class__.preorder:
-            self.__preorder(self.__root)
-        elif order == self.__class__.inorder:
-            self.__inorder(self.__root)
-        elif order == self.__class__.postorder:
-            self.__postorder(self.__root)
-        else:
-            raise ValueError('Invalid order value')
-        print()
-
-    def __preorder(self, root): 
-        if not root: 
-            return
-  
-        print("{0} ".format(root.value), end="") 
-        self.__preorder(root.left) 
-        self.__preorder(root.right) 
-
-
-    def __inorder(self, root): 
-        if not root: 
-            return
-  
-        self.__inorder(root.left) 
-        print("{0} ".format(root.value), end="") 
-        self.__inorder(root.right) 
-
-
-    def __postorder(self, root): 
-        if not root: 
-            return
-  
-        self.__postorder(root.left) 
-        self.__postorder(root.right) 
-        print("{0} ".format(root.value), end="") 
-
 
     def delete(self, key:object):
         '''
@@ -446,8 +442,7 @@ class AVLTree(object):
                 return load
         else:
             return None
-        
-        
+
 
     def __delete(self, root:Node, key:object)->Node: 
         """
@@ -535,66 +530,6 @@ class AVLTree(object):
         else:
             return f'{root} {self.__strPreOrder(root.left)} {self.__strPreOrder(root.right)}'
     
-
-    def treeview(self):
-        '''
-        Displays the tree in a visual way, in order to understand where
-        nodes were inserted.
-        '''
-        if self.__root is None:
-            return
-        lines, *_ = self.__visual(self.__root)
-        for line in lines:
-            print(line)
-
-    def __visual(self, node):
-        """
-        Returns list of strings, width, height, and horizontal coordinate
-        of the root.
-        """
-        # No child.
-        if node.right is None and node.left is None:
-            line = f'{node.value}'
-            width = len(line)
-            height = 1
-            middle = width // 2
-            return [line], width, height, middle
-
-        # Only left child.
-        if node.right is None:
-            lines, n, p, x = self.__visual(node.left)
-            s = f'{node.value}'
-            u = len(s)
-            first_line = (x + 1) * ' ' + (n - x - 1) * '_' + s
-            second_line = x * ' ' + '/' + (n - x - 1 + u) * ' '
-            shifted_lines = [line + u * ' ' for line in lines]
-            return [first_line, second_line] + shifted_lines, n + u, p + 2, n + u // 2
-
-        # Only right child.
-        if node.left is None:
-            lines, n, p, x = self.__visual(node.right)
-            s = f'{node.value}'
-            u = len(s)
-            first_line = s + x * '_' + (n - x) * ' '
-            second_line = (u + x) * ' ' + '\\' + (n - x - 1) * ' '
-            shifted_lines = [u * ' ' + line for line in lines]
-            return [first_line, second_line] + shifted_lines, n + u, p + 2, u // 2
-
-        # Two children.
-        left, n, p, x  = self.__visual(node.left)
-        right, m, q, y = self.__visual(node.right)
-        s = f'{node.value}'
-        u = len(s)
-        first_line = (x + 1) * ' ' + (n - x - 1) * '_' + s + y * '_' + (m - y) * ' '
-        second_line = x * ' ' + '/' + (n - x - 1 + u + y) * ' ' + '\\' + (m - y - 1) * ' '
-        if p < q:
-            left += [n * ' '] * (q - p)
-        elif q < p:
-            right += [m * ' '] * (p - q)
-        zipped_lines = zip(left, right)
-        lines = [first_line, second_line] + [a + u * ' ' + b for a, b in zipped_lines]
-        return lines, n + m + u, max(p, q) + 2, n + u // 2     
-    
     def build(self,values:List[any]):
         '''
         Builds a balanced binary search tree in the order the nodes appear in
@@ -640,24 +575,55 @@ class AVLTree(object):
         value = self.search(key)
         return True if value else None
     
-
-
-
-
-
     
-    def __str__(self):
-        if self.__root is None:
-            return "Empty AVL Tree"
-        return self.__print_tree(self.__root, "", True)
+if __name__ == "__main__":
+    class Reserva:
+        def __init__(self, quarto, periodo, cliente):
+            self.quarto = quarto
+            self.periodo = periodo
+            self.cliente = cliente
+            
+        def __lt__(self, o):
+            return self.periodo <  o.periodo
+        
+        def __eq__(self, o):
+            return self.periodo == o.periodo
+            
+        def __str__(self):
+            return f"{self.quarto=} {self.periodo=} {self.cliente=}"
+        
+        def __repr__(self):
+            return f"{self.quarto=} {self.periodo=} {self.cliente=}"
+        
+    import random
+    # Gera varias reservas aleatorias
+    objetos = [Reserva(*(random.sample(range(30), 3))) for _ in range(10)]
 
-    def __print_tree(self, node, prefix="", is_tail=True):
-        result = ""
-        if node.right is not None:
-            new_prefix = prefix + ("│   " if is_tail else "    ")
-            result += self.__print_tree(node.right, new_prefix, False)
-        result += prefix + ("└── " if is_tail else "┌── ") + str(node.value) + "\n"
-        if node.left is not None:
-            new_prefix = prefix + ("    " if is_tail else "│   ")
-            result += self.__print_tree(node.left, new_prefix, True)
-        return result
+    a = AVLTree()
+
+    # Coloca esses objetos na AVL
+    for o in objetos:
+        a.add(o)
+        
+    # Adiciona algumas reservas com o periodo 1
+    a.add(Reserva(0, 1, 32))
+    a.add(Reserva(1, 1, 32))
+    a.add(Reserva(2, 1, 32))
+        
+    # Procuro 1 reserva como periodo 1
+    print("Primeira busca ---")   
+    print(a.search(Reserva(0, 1, 0)))
+
+    # Procuro todas as reservas com o periodo 1
+    # (obs: coloquei o *map(str, ...))) so para ficar visualizável, mas nao precisa)
+    print("\nSegunda busca ---")   
+    print(*map(str, a.search_all(Reserva(0, 1, 0))), sep="\n")
+
+    # Busco por um valor ou mais valores especificos
+    valores = []
+    for i in a:
+        if i.quarto == 2:
+            valores.append(i)
+            
+    print("\nTerceira busca ---")   
+    print(*map(str, valores), sep="\n")
