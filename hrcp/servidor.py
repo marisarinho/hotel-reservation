@@ -28,7 +28,7 @@ class Quarto:
             preco = 150 + (i % 3) * 50  # Alterna preços automaticamente
             camas = (i % 3) + 1  # Alterna entre 1, 2 e 3 camas
             hash_table.insert(num_quarto, Quarto(num_quarto, preco, camas))
-            fila_reservas.enfileirar(Quarto)
+            # fila_reservas.enfileirar(Quarto)
 
 class Reserva:
     def __init__(self, quarto: Quarto, periodo, user: User):
@@ -52,6 +52,7 @@ class Reserva:
       return not (self.periodo_fim < outra_reserva.periodo_inicio or self.periodo_inicio > outra_reserva.periodo_fim)
 
 class Servidor:
+
     def __init__(self, host='localhost', porta=12345):
         self.host = host
         self.porta = porta
@@ -60,6 +61,8 @@ class Servidor:
         self.arvore_avl_reservas = AVLTree()
         self.fila_reservas = Fila()
         Quarto.gerar_quartos(self.hash_quartos)  # Corrigido: agora passa um instância
+
+
 
    
     def realizar_reserva(self, cpf, num_quarto, periodo): 
@@ -102,21 +105,18 @@ class Servidor:
         
         return f"Reserva realizada com sucesso para o quarto {num_quarto}!"
 
-    def cancelar_reserva(self, cpf, num_quarto, periodo):
-    # Obtém todas as reservas desse usuário
-        reservas_usuario = self.consultar_reserva(cpf)
 
-        # Converte o período para o formato correto
+
+    def cancelar_reserva(self, cpf, num_quarto, periodo):
+
+        reservas_usuario = self.consultar_reserva(cpf)
         periodo_inicio, periodo_fim = periodo.split("-")
         periodo_tupla = (periodo_inicio, periodo_fim)
 
         if reservas_usuario:
             for r in self.arvore_avl_reservas:
                 if r.user.cpf == cpf and r.quarto.num_quarto == num_quarto and r.periodo == periodo_tupla:
-                    # Se encontrar a reserva, remove da árvore AVL
                     self.arvore_avl_reservas.delete(r)
-                    
-                    # Atualiza a disponibilidade do quarto
                     quarto = self.hash_quartos.get(num_quarto)
                     if quarto:
                         quarto.disponibilidade = True
@@ -128,59 +128,22 @@ class Servidor:
         # if reservas:
         #     return [f"Quarto {r.quarto.num_quarto} reservado de {r.periodo[0]} até {r.periodo[1]}" for r in reservas]
             # return ["Não há reservas para este CPF."]
-    def consultar_reserva(self, cpf, reserva = Reserva):
+
+
+
+    def consultar_reserva(self, cpf):
         """
         Consulta todas as reservas associadas a um CPF na árvore AVL de reservas.
-
-        Retorna:
-        --------
-        Uma lista formatada com informações das reservas, ou uma mensagem caso não haja reservas.
         """
-        
         usuario_encontrado = self.hash_usuarios.search(cpf)
         if not usuario_encontrado:
             return f"Nenhum usuário encontrado com o CPF {cpf}."
-        
         peguei_usuario = self.hash_usuarios.get(cpf)
-        
-        # Buscar todas as reservas do usuário na árvore AVL
-        reservas = self.arvore_avl_reservas.search_all(None)
-
-        if not reservas:
-            return f"Nenhuma reserva encontrada para o CPF {cpf}."
-
-        for r in reservas:
-            if r.cpf == peguei_usuario.cpf:
-                return [f"Quarto {r.quarto.num_quarto} reservado de {r.periodo_inicio} até {r.periodo_fim}" for r in reservas]
-
-    def listar_quartos(fila_reservas):
-        """Lista os quartos de 5 em 5, permitindo ao usuário avançar ou voltar ao menu."""
-        
-        if fila_reservas.estaVazia():
-            print("Não há quartos disponíveis no momento.")
-            return
-
-        continuar = True
-
-        while continuar:
-            # Exibe os primeiros 5 quartos
-            for i in range(1, min(6, len(fila_reservas) + 1)):  # Evita erro se restarem menos de 5 quartos
-                quarto = fila_reservas.get(i)
-                print(f"Quarto {quarto.num_quarto} | Preço: R${quarto.preco} | Camas: {quarto.camas} | Disponível: {'Sim' if quarto.disponibilidade else 'Não'}")
-
-            # Menu de opções
-            print("\nEscolha uma opção:")
-            print("1 - Voltar ao menu")
-            print("2 - Listar mais quartos")
+        reserva_achada = self.buscar_reservas_por_cpf(peguei_usuario.cpf)
+        for r in reserva_achada:
+            print(f'quarto{r.num_quarto}, periodo{r.periodo}')
             
-            opcao = input("Opção: ")
-
-            if opcao == "1":
-                continuar = False  # Sai do loop e volta ao menu principal
-            elif opcao == "2":
-                fila_reservas.rotacionar(-5)  # Move os próximos 5 quartos para a frente da fila
-            else:
-                print("Opção inválida. Tente novamente.\n")
+        
         
     def start(self):
         servidor_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -193,6 +156,7 @@ class Servidor:
             print(f"Cliente conectado: {endereco}")
             thread_cliente = threading.Thread(target=self.lidar_com_cliente, args=(conexao,))
             thread_cliente.start()
+
 
     def lidar_com_cliente(self, conexao):
         while True:
@@ -230,5 +194,5 @@ class Servidor:
 
 
 if __name__ == "__main__":
-    porta = int(input("Digite a porta para o servidor: "))  # Pergunta ao usuário a porta desejada
+    porta = int(input("Digite a porta para o servidor: ")) 
     Servidor(porta=porta).start()

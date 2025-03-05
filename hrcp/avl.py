@@ -154,30 +154,47 @@ class AVLTree(object):
             self.__search_all(key, self.__root, results)
         return results
 
+    # def __search_all(self, key: any, node: Node, results: list):
+    #     """
+    #     Private method that performs a recursive search in AVL Tree to find all nodes
+    #     whose key is equal to "key" argument.
+
+    #     Arguments
+    #     ------------
+    #     key (any): the key value to be searched in AVL Tree
+    #     node (Node): the node to be used as reference to start the search
+    #     results (list): list to store found values
+    #     """
+    #     if node is None:
+    #         return
+        
+    #     if key == node.value:
+    #         results.append(node.value)
+    #         self.__search_all(key, node.right, results)
+        
+    #     if key < node.value:
+    #         self.__search_all(key, node.left, results)
+        
+    #     if key > node.value:
+    #         self.__search_all(key, node.right, results)
     def __search_all(self, key: any, node: Node, results: list):
         """
         Private method that performs a recursive search in AVL Tree to find all nodes
         whose key is equal to "key" argument.
-
-        Arguments
-        ------------
-        key (any): the key value to be searched in AVL Tree
-        node (Node): the node to be used as reference to start the search
-        results (list): list to store found values
         """
         if node is None:
             return
-        
+
         if key == node.value:
             results.append(node.value)
-            self.__search_all(key, node.right, results)
-        
-        if key < node.value:
-            self.__search_all(key, node.left, results)
-        
-        if key > node.value:
+            self.__search_all(key, node.left, results)  # Buscar na esquerda também!
             self.__search_all(key, node.right, results)
 
+        elif key < node.value:
+            self.__search_all(key, node.left, results)
+
+        else:  # key > node.value
+            self.__search_all(key, node.right, results)
     def search(self, key:any )->any:
         '''
         Perform a search in AVL Tree to find the node whose key is equal to "key" argument.
@@ -575,7 +592,21 @@ class AVLTree(object):
         value = self.search(key)
         return True if value else None
     
-    
+    def buscar_reservas_por_cpf(self, cpf):
+        reservas = []
+        self._buscar_reservas_por_cpf(self.raiz, cpf, reservas)
+        return reservas
+
+    def _buscar_reservas_por_cpf(self, no, cpf, reservas):
+        if no is not None:
+            if no.reserva.cpf_usuario == cpf:
+                reservas.append(no.reserva)
+            # Continua buscando nas subárvores esquerda e direita
+            self._buscar_reservas_por_cpf(no.esquerda, cpf, reservas)
+            self._buscar_reservas_por_cpf(no.direita, cpf, reservas)
+
+
+            
 if __name__ == "__main__":
     class Reserva:
         def __init__(self, quarto, periodo, cliente):
