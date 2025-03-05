@@ -592,18 +592,21 @@ class AVLTree(object):
         value = self.search(key)
         return True if value else None
     
-    def buscar_reservas_por_cpf(self, cpf):
+    def buscar_reservas_por_cpf(self, usuario):
         reservas = []
-        self._buscar_reservas_por_cpf(self.raiz, cpf, reservas)
+        if self.getRoot:  # Verifica se a árvore não está vazia
+            self._buscar_reservas_por_cpf(self.root, usuario.cpf, reservas)
         return reservas
 
-    def _buscar_reservas_por_cpf(self, no, cpf, reservas):
-        if no is not None:
-            if no.reserva.cpf_usuario == cpf:
-                reservas.append(no.reserva)
+
+    def _buscar_reservas_por_cpf(self, node, cpf, reservas):
+        if node is not None:
+            # Verifica se o CPF do nó atual é o que estamos buscando
+            if node.reserva.cpf_usuario == cpf:
+                reservas.append(node.reserva)
             # Continua buscando nas subárvores esquerda e direita
-            self._buscar_reservas_por_cpf(no.esquerda, cpf, reservas)
-            self._buscar_reservas_por_cpf(no.direita, cpf, reservas)
+            self._buscar_reservas_por_cpf(node.esquerda, cpf, reservas)
+            self._buscar_reservas_por_cpf(node.direita, cpf, reservas)
 
 
             

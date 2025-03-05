@@ -3,7 +3,6 @@ import threading
 from avl import AVLTree
 from hashTable import HashTable
 from fila import Fila
-from datetime import datetime
 
 class User:
     def __init__(self, nome, cpf, telefone):
@@ -108,43 +107,35 @@ class Servidor:
 
 
     def cancelar_reserva(self, cpf, num_quarto, periodo):
-
-        reservas_usuario = self.consultar_reserva(cpf)
-        periodo_inicio, periodo_fim = periodo.split("-")
-        periodo_tupla = (periodo_inicio, periodo_fim)
-
-        if reservas_usuario:
-            for r in self.arvore_avl_reservas:
-                if r.user.cpf == cpf and r.quarto.num_quarto == num_quarto and r.periodo == periodo_tupla:
-                    self.arvore_avl_reservas.delete(r)
-                    quarto = self.hash_quartos.get(num_quarto)
-                    if quarto:
-                        quarto.disponibilidade = True
-                    
-                    return f"Reserva do quarto {num_quarto} para o período {periodo} cancelada com sucesso."
-        
-        return f"Nenhuma reserva encontrada para o CPF {cpf} no quarto {num_quarto} para o período {periodo}."
-        # reservas = [r for r in self.arvore_avl_reservas if r.user.cpf == cpf]
-        # if reservas:
-        #     return [f"Quarto {r.quarto.num_quarto} reservado de {r.periodo[0]} até {r.periodo[1]}" for r in reservas]
-            # return ["Não há reservas para este CPF."]
-
+        """Cancela uma reserva X relacionada ao CPF passado"""
+        pass
 
 
     def consultar_reserva(self, cpf):
         """
-        Consulta todas as reservas associadas a um CPF na árvore AVL de reservas.
+        Consulta todas as reservas associadas a um CPF na árvore AVL de reservas
+        e na tabela de hash de usuários.
         """
-        usuario_encontrado = self.hash_usuarios.search(cpf)
+        usuario_encontrado = self.hash_usuarios.get(cpf)  
         if not usuario_encontrado:
             return f"Nenhum usuário encontrado com o CPF {cpf}."
-        peguei_usuario = self.hash_usuarios.get(cpf)
-        reserva_achada = self.buscar_reservas_por_cpf(peguei_usuario.cpf)
-        for r in reserva_achada:
-            print(f'quarto{r.num_quarto}, periodo{r.periodo}')
+        
+        reserva_achada = self.arvore_avl_reservas.buscar_reservas_por_cpf(usuario_encontrado)  
+
+        if reserva_achada:  
+            for r in reserva_achada:
+                print(f'Quarto: {r.numero_quarto}, Período: {r.periodo_reservado}')
+        else:
+            print(f'Nenhuma reserva encontrada para o CPF {cpf}.')
+
+
+
+    def listar(self, hash_quartos):
+        """Lista todos os quartos(disponiveis ou nao)
+            A listagem é feita usando uma fila, mostrando 5 quartos por vez"""
+        pass
+
             
-        
-        
     def start(self):
         servidor_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         servidor_socket.bind((self.host, self.porta))
@@ -181,8 +172,8 @@ class Servidor:
                     cpf = comando[1]
                     resposta = "\n".join(self.consultar_reserva(cpf))
 
-                elif comando[0] == "LISTAR" and len(comando)>=1:
-                    reposta = self.listar_quartos(fila_reservas)
+                # elif comando[0] == "LISTAR" and len(comando)>=1:
+                    # reposta = self.listar_quartos(fila_reservas)
                 elif comando[0] == "SAIR":
                     conexao.close()
                     return
