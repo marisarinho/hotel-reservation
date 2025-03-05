@@ -48,7 +48,7 @@ class Reserva:
         return self.__str__()
     
     def periodo_conflita(self, outra_reserva):
-        return not (self.periodo[1] < outra_reserva.periodo[0] or self.periodo[0] > outra_reserva.periodo[1])
+      return not (self.periodo_fim < outra_reserva.periodo_inicio or self.periodo_inicio > outra_reserva.periodo_fim)
 
 class Servidor:
     def __init__(self, host='localhost', porta=12345):
@@ -60,38 +60,47 @@ class Servidor:
         self.fila_reservas = Fila()
         Quarto.gerar_quartos(self.hash_quartos)  # Corrigido: agora passa um instância
 
-    def realizar_reserva(self, cpf, num_quarto, periodo): #5678 101 1-2 marçp
+   
+    def realizar_reserva(self, cpf, num_quarto, periodo): 
+        periodo_inicio, periodo_fim = periodo.split("-")
+        periodo_tupla = (periodo_inicio, periodo_fim)
+        
+        # Buscando o usuário
         usuario = None
         try:
             usuario = self.hash_usuarios.get(cpf)
         except KeyError as e:
-            print("Usuario não encontrado", e)
-        if usuario == None:
+            print("Usuário não encontrado", e)
+        if usuario is None:
             usuario = User(nome="Usuário Padrão", cpf=cpf, telefone="0000-0000")
             self.hash_usuarios.insert(cpf, usuario)
+
+        # Buscando o quarto
         quarto = None
         try:
             quarto = self.hash_quartos.get(num_quarto)
         except KeyError as e:
             print("Quarto não encontrado", e)
-        if  quarto == None:
+        if quarto is None:
             raise ValueError("Quarto não encontrado!")
-        reserva = Reserva(quarto, periodo, usuario)
-        reservas_existentes = self.arvore_avl_reservas.search(reserva) 
-        if reservas_existentes:
-            for reserva in reservas_existentes:
-                if reserva.periodo_conflita(Reserva(quarto, periodo, usuario)):
-                    raise ValueError(f"O quarto {num_quarto} já está reservado para o período solicitado!")
-        reserva = Reserva(quarto, periodo, usuario)
-        self.arvore_avl_reservas.add(reserva)
-        quarto = self.hash_quartos.get(num_quarto)
-        quarto.disponibilidade = False 
-        print(self.arvore_avl_reservas)
 
+        # Criando a reserva
+        reserva = Reserva(quarto, periodo_tupla, usuario)
+
+       
+        reservas_existentes = self.arvore_avl_reservas.search_all(reserva) 
+        for r in reservas_existentes:
+            if r.quarto == reserva.quarto:  
+                if reserva.periodo_conflita(reserva):  
+                    raise ValueError(f"O quarto {num_quarto} já está reservado para o período solicitado!")
+
+        self.arvore_avl_reservas.add(reserva)
+        quarto.disponibilidade = False  
+
+        print(self.arvore_avl_reservas)
+        
         return f"Reserva realizada com sucesso para o quarto {num_quarto}!"
 
-        
-    
     def cancelar_reserva(self, cpf, num_quarto, periodo):
     # Obtém todas as reservas desse usuário
         reservas_usuario = self.consultar_reserva(cpf)
