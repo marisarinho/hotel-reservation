@@ -38,8 +38,9 @@ class Cliente:
             if opcao == "1":
                 cpf = input("Digite seu CPF: ")
                 num_quarto = input("Número do quarto: ")
-                periodo = input("Período da reserva (ex: 10-15 Março): ")
-                self.enviar_requisicao(f"RESERVAR {cpf} {num_quarto} {periodo}")
+                data_entrada = input("Data de entrada (ex: 2025-03-15):")
+                data_saida = input("Data de saida (ex: 2025-03-15):")
+                self.enviar_requisicao(f"RESERVAR {cpf} {num_quarto} {data_entrada} {data_saida}")
 
             elif opcao == "2":
                 cpf = input("Digite seu CPF: ")

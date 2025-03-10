@@ -1,24 +1,24 @@
-from hrcp.estruturasDeDados.avl import AVLTree
-from hrcp.estruturasDeDados.hashTable import HashTable
-from hrcp.estruturasDeDados.fila import Fila
-from hrcp.gerenciamento.user import User
-from hrcp.gerenciamento.reserva import Reserva
-from hrcp.gerenciamento.quarto import Quarto
-
+from hashTable import HashTable
+from user import User
+from reserva import Reserva
+from quarto import Quarto
+from listaOrd import Lista
+from function import gerar_quartos
+from datetime import datetime
 
 class GerenciadorReservas:
+
     def __init__(self):
+        self.hash_usuarios = HashTable(capacity=50)
         self.hash_quartos = HashTable(capacity=25)
-        self.arvore_avl_reservas = AVLTree()
-        self.fila_reservas = Fila()
-        Quarto.gerar_quartos(self.hash_quartos)  # Corrigido: agora passa um instância
+        self.lista_reservas = Lista()
+        gerar_quartos(self.hash_quartos)  
 
-
-    def realizar_reserva(self, cpf, num_quarto, periodo): 
-        periodo_inicio, periodo_fim = periodo.split("-")
-        periodo_tupla = (periodo_inicio, periodo_fim)
+    def realizar_reserva(self, cpf, num_quarto, data_entrada, data_saida):
         
-        # Buscando o usuário
+        data_entrada = datetime.strptime(data_entrada, "%Y-%m-%d")
+        data_saida = datetime.strptime(data_saida, "%Y-%m-%d")
+        
         usuario = None
         try:
             usuario = self.hash_usuarios.get(cpf)
@@ -37,26 +37,24 @@ class GerenciadorReservas:
         if quarto is None:
             raise ValueError("Quarto não encontrado!")
 
-        # Criando a reserva
-        reserva = Reserva(quarto, periodo_tupla, usuario)
-
+    
+        nova_reserva = Reserva(quarto, data_entrada, data_saida, usuario)
+        
        
-        reservas_existentes = self.arvore_avl_reservas.search_all(reserva) 
-        for r in reservas_existentes:
-            if r.quarto == reserva.quarto:  
-                if reserva.periodo_conflita(reserva):  
-                    raise ValueError(f"O quarto {num_quarto} já está reservado para o período solicitado!")
+        for reserva in self.lista_reservas:
+            if reserva.quarto == nova_reserva.quarto:
+                if not (data_saida <= reserva.data_entrada or data_entrada >= reserva.data_saida):
+                    raise ValueError(f"O quarto {num_quarto} já está reservado de {reserva.data_entrada} a {reserva.data_saida}.")
 
-        self.arvore_avl_reservas.add(reserva)
+        self.lista_reservas.inserir(nova_reserva)
+        print(self.lista_reservas)
         quarto.disponibilidade = False  
 
-        print(self.arvore_avl_reservas)
-        
         return f"Reserva realizada com sucesso para o quarto {num_quarto}!"
 
 
 
-    def cancelar_reserva(self, cpf, num_quarto, periodo):
+    def cancelar_reserva(self, cpf, num_quarto, data_entrada, data_saida):
         """Cancela uma reserva X relacionada ao CPF passado"""
         pass
 

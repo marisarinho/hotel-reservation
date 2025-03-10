@@ -1,22 +1,10 @@
 import socket
 import threading
-from hrcp.estruturasDeDados.avl import AVLTree
-from hrcp.estruturasDeDados.hashTable import HashTable
-from hrcp.estruturasDeDados.fila import Fila
-from hrcp.gerenciamento.user import User
-from hrcp.gerenciamento.reserva import Reserva
-from hrcp.gerenciamento.quarto import Quarto
-from hrcp.gerenciamento.gerenciamento import GerenciadorReservas
-
-    # @staticmethod
-    # def gerar_quartos(hash_table, quantidade=20):
-    #     for i in range(1, quantidade + 1):
-    #         num_quarto = 100 + i
-    #         preco = 150 + (i % 3) * 50  # Alterna preços automaticamente
-    #         camas = (i % 3) + 1  # Alterna entre 1, 2 e 3 camas
-    #         hash_table.insert(num_quarto, Quarto(num_quarto, preco, camas))
-    #         # fila_reservas.enfileirar(Quarto)
-
+from hashTable import HashTable
+from user import User
+from reserva import Reserva
+from quarto import Quarto
+from gerenciamento import GerenciadorReservas
 
 
 class Servidor:
@@ -24,9 +12,9 @@ class Servidor:
     def __init__(self, host='localhost', porta=12345):
         self.host = host
         self.porta = porta
+        self.gerenciador = GerenciadorReservas()
+        print(f"Gerenciador: {self.gerenciador}")
         
-
-            
     def start(self):
         servidor_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         servidor_socket.bind((self.host, self.porta))
@@ -53,8 +41,8 @@ class Servidor:
                 resposta = "Comando inválido."
 
                 if comando[0] == "RESERVAR" and len(comando) >= 4:
-                    cpf, num_quarto, periodo = comando[1], int(comando[2]), comando[3]
-                    resposta = self.realizar_reserva(cpf, num_quarto, periodo)
+                    cpf, num_quarto, data_entrada , data_saida = comando[1], int(comando[2]), comando[3] , comando [4]
+                    resposta = self.gerenciador.realizar_reserva(cpf, num_quarto,data_entrada,data_saida)
                 
                 elif comando[0] == "CANCELAR" and len(comando) >= 3:
                     cpf, num_quarto, periodo = comando[1], int(comando[2]), comando[3]
