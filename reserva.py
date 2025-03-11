@@ -8,7 +8,6 @@ class Reserva:
         self.data_saida = data_saida
         self.user = user
     
-    
     def __lt__(self, other):
         return self.data_entrada < other.data_entrada  # Ordenação apenas pela data de entrada
             

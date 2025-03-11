@@ -29,9 +29,8 @@ class Cliente:
             print("\n--- Sistema de Reservas ---")
             print("1. Fazer reserva")
             print("2. Cancelar reserva")
-            print("3. Listar reservas (5 por vez)")
-            print("4. Consultar reserva por CPF")
-            print("5. Sair")
+            print("3. Consultar reserva por CPF")
+            print("4. Sair")
 
             opcao = input("Escolha uma opção: ")
 
@@ -45,16 +44,16 @@ class Cliente:
             elif opcao == "2":
                 cpf = input("Digite seu CPF: ")
                 num_quarto = input("Número do quarto para cancelar: ")
-                self.enviar_requisicao(f"CANCELAR {cpf} {num_quarto}")
+                data_entrada = input("Data de entrada (ex: 2025-03-15):")
+                data_saida = input("Data de saida (ex: 2025-03-15):")
+                self.enviar_requisicao(f"CANCELAR {cpf} {num_quarto} {data_entrada} {data_saida}")
 
+        
             elif opcao == "3":
-                self.enviar_requisicao(f"LISTAR {fila_reservas}")
-
-            elif opcao == "4":
                 cpf = input("Digite seu CPF: ")
                 self.enviar_requisicao(f"CONSULTAR {cpf}")
 
-            elif opcao == "5":
+            elif opcao == "4":
                 print("Encerrando conexão...")
                 self.fechar_conexao()
                 break

@@ -1,15 +1,13 @@
 import socket
 import threading
-from hashTable import HashTable
-from user import User
-from reserva import Reserva
-from quarto import Quarto
+import sys
 from gerenciamento import GerenciadorReservas
+from exception import ErroDeReserva
 
 
 class Servidor:
 
-    def __init__(self, host='localhost', porta=12345):
+    def __init__(self, host='0.0.0.0', porta=12345):
         self.host = host
         self.porta = porta
         self.gerenciador = GerenciadorReservas()
@@ -44,16 +42,26 @@ class Servidor:
                     cpf, num_quarto, data_entrada , data_saida = comando[1], int(comando[2]), comando[3] , comando[4]
                     resposta = self.gerenciador.realizar_reserva(cpf, num_quarto,data_entrada,data_saida)
                 
-                elif comando[0] == "CANCELAR" and len(comando) >= 3:
+                elif comando[0] == "CANCELAR" and len(comando) >= 4:
                     cpf, num_quarto, data_entrada, data_saida = comando[1], int(comando[2]), comando[3], comando[4]
                     resposta = self.gerenciador.cancelar_reserva(cpf, num_quarto,data_entrada,data_saida)
 
                 elif comando[0] == "CONSULTAR" and len(comando) >= 1:
                     cpf = comando[1]
-                    resposta = self.gerenciador.consultar_reserva(cpf)
+                    usuario = self.gerenciador.buscar_usuario(cpf)
+                    if not usuario:
+                        resposta = 'coloca resposta de erro'
+                    else:
+                        reservas = self.gerenciador.consultar_reserva(cpf)
+                        if len(reservas) == 0:
+                            resposta = "Sem reservas"
+                        else:
+                            resposta = f"Usuário: {usuario.cpf}, Nome: {usuario.nome}, Telefone: {usuario.telefone}, Reservas: \n"
 
-                # elif comando[0] == "LISTAR" and len(comando)>=1:
-                    # reposta = self.listar_quartos(fila_reservas)
+                            for reserva in reservas:
+                                resposta +=  f"Quarto: {reserva.quarto.num_quarto}, Data de entrada: {reserva.data_entrada}, Data de saída: {reserva.data_saida} \n"
+
+
                 elif comando[0] == "SAIR":
                     conexao.close()
                     return
@@ -65,5 +73,9 @@ class Servidor:
 
 
 if __name__ == "__main__":
-    porta = int(input("Digite a porta para o servidor: ")) 
-    Servidor(porta=porta).start()
+    if len(sys.argv)>1:
+        porta = int(sys.argv[1])
+        Servidor(porta=porta).start()
+    else:
+        Servidor().start()
+    
