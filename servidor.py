@@ -41,15 +41,16 @@ class Servidor:
                 resposta = "Comando inválido."
 
                 if comando[0] == "RESERVAR" and len(comando) >= 4:
-                    cpf, num_quarto, data_entrada , data_saida = comando[1], int(comando[2]), comando[3] , comando [4]
+                    cpf, num_quarto, data_entrada , data_saida = comando[1], int(comando[2]), comando[3] , comando[4]
                     resposta = self.gerenciador.realizar_reserva(cpf, num_quarto,data_entrada,data_saida)
                 
                 elif comando[0] == "CANCELAR" and len(comando) >= 3:
-                    cpf, num_quarto, periodo = comando[1], int(comando[2]), comando[3]
-                    resposta = self.cancelar_reserva(cpf, num_quarto, periodo)
+                    cpf, num_quarto, data_entrada, data_saida = comando[1], int(comando[2]), comando[3], comando[4]
+                    resposta = self.gerenciador.cancelar_reserva(cpf, num_quarto,data_entrada,data_saida)
+
                 elif comando[0] == "CONSULTAR" and len(comando) >= 1:
                     cpf = comando[1]
-                    resposta = "\n".join(self.consultar_reserva(cpf))
+                    resposta = self.gerenciador.consultar_reserva(cpf)
 
                 # elif comando[0] == "LISTAR" and len(comando)>=1:
                     # reposta = self.listar_quartos(fila_reservas)

@@ -55,30 +55,33 @@ class GerenciadorReservas:
 
 
     def cancelar_reserva(self, cpf, num_quarto, data_entrada, data_saida):
-        """Cancela uma reserva X relacionada ao CPF passado"""
-        pass
+        if self.consultar_reserva(cpf):
+            for reserva in self.lista_reserva:
+                if reserva.num_quarto == num_quarto and reserva.data_entrada == data_entrada  and reserva.data_saida == data_saida:
+                    lista_reserva.remove(reserva)
+                    
+                    return f"Reserva cancelada com sucesso para o quarto {num_quarto}."
+                    break 
+        return "Reserva não encontrada ou não corresponde aos critérios especificados."
 
 
     def consultar_reserva(self, cpf):
-        """
-        Consulta todas as reservas associadas a um CPF na árvore AVL de reservas
-        e na tabela de hash de usuários.
-        """
+ 
         usuario_encontrado = self.hash_usuarios.get(cpf)  
         if not usuario_encontrado:
             return f"Nenhum usuário encontrado com o CPF {cpf}."
         
-        reserva_achada = self.arvore_avl_reservas.buscar_reservas_por_cpf(usuario_encontrado)  
+        reservasEncontradas = 0
+        
+        stringFinal = f"Usuário: {usuario_encontrado.cpf}, Nome: {usuario_encontrado.nome}, Telefone: {usuario_encontrado.telefone}, Reservas: \n"
+        
+        for reserva in self.lista_reservas:
+            if reserva.user.cpf == cpf:
+                reservasEncontradas+=1
+                stringFinal += f"Quarto: {reserva.quarto.num_quarto}, Data de entrada: {reserva.data_entrada}, Data de saída: {reserva.data_saida} \n"
+                
+        if reservasEncontradas == 0:
+            return f"Usuário {cpf} não possui reservas."
+        
+        return stringFinal
 
-        if reserva_achada:  
-            for r in reserva_achada:
-                print(f'Quarto: {r.numero_quarto}, Período: {r.periodo_reservado}')
-        else:
-            print(f'Nenhuma reserva encontrada para o CPF {cpf}.')
-
-
-
-    def listar(self, hash_quartos):
-        """Lista todos os quartos(disponiveis ou nao)
-            A listagem é feita usando uma fila, mostrando 5 quartos por vez"""
-        pass
