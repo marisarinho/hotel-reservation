@@ -50,7 +50,7 @@ class Servidor:
                     cpf = comando[1]
                     usuario = self.gerenciador.buscar_usuario(cpf)
                     if not usuario:
-                        resposta = 'coloca resposta de erro'
+                        resposta = '0'
                     else:
                         reservas = self.gerenciador.consultar_reserva(cpf)
                         if len(reservas) == 0:

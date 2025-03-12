@@ -55,14 +55,15 @@ class GerenciadorReservas:
         return f"Reserva realizada com sucesso para o quarto {num_quarto}!"
     
     def cancelar_reserva(self, cpf, quarto, data_entrada, data_saida):
+        # Tava comparando quarto(reserva.quarto) com o numero dele (quarto) 
         reservas_usuario = self.consultar_reserva(cpf)
 
         for reserva in reservas_usuario:
-            if (reserva.quarto == quarto and
+            if (reserva.quarto.num_quarto == quarto and
                 reserva.data_entrada == datetime.strptime(data_entrada, "%Y-%m-%d") and
                 reserva.data_saida == datetime.strptime(data_saida, "%Y-%m-%d")):
                 
-                self.lista_reservas.remover(reserva)  # Remove a reserva da lista ordenada
+                self.lista_reservas.remover(self.lista_reservas.busca(reserva))  # Remove a reserva da lista ordenada
                 self.hash_quartos.get(quarto).disponibilidade = True  # Libera o quarto
                 return f"Reserva do quarto {quarto} cancelada com sucesso."
 
@@ -70,33 +71,7 @@ class GerenciadorReservas:
 
     
     
-    
-    # def cancelar_reserva(self, cpf, num_quarto):
-    #     # verifica se o quarto existe
-    #     try:
-    #         quarto = self.hash_quartos.get(num_quarto)
-    #     except KeyError:
-    #         return f"Erro: Quarto {num_quarto} não encontrado."
-
-    #     # procura pela reserva e remove se encontrar
-    #     for reserva in self.lista_reservas:
-    #         if reserva.user.cpf == cpf and reserva.quarto == quarto:
-    #             self.lista_reservas.remover(reserva)
-    #             quarto.disponibilidade = True  # Libera o quarto
-    #             return f"Reserva do quarto {num_quarto} cancelada com sucesso."
-
-    #     return "Erro: Reserva não encontrada."
-
-    # def cancelar_reserva(self, cpf, num_quarto, data_entrada, data_saida):
-    #     reserva_cancelar = 0
-    #     for reserva in self.lista_reserva:
-    #         if reserva.num_quarto == num_quarto and reserva.data_entrada == data_entrada and reserva.data_saida == data_saida:
-    #                 self.lista_reserva.remove(reserva)
-    #                 reserva_cancelar+=1
-    #                 return f"Reserva cancelada com sucesso para o quarto {num_quarto}."
-    #     if reserva_cancelar == 0:
-    #         return "Reserva não encontrada ou não corresponde aos critérios especificados." 
-
+  
     def buscar_usuario(self, cpf) -> Optional[User]: # Optional -> None ou [valor]
         try:
             return self.hash_usuarios.get(cpf)  
