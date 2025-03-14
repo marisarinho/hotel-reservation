@@ -15,7 +15,7 @@ def validar_cpf(cpf):
 
     for char in cpf:
         if char not in "0123456789":
-            resposta = ErroDeReserva("CPF inválido! Deve conter apenas números.")
+            raise ErroDeReserva("CPF inválido! Deve conter apenas números.")
         
 def validar_numero_quarto(num_quarto):
     try:
@@ -25,17 +25,6 @@ def validar_numero_quarto(num_quarto):
     except ValueError:
         resposta = ErroDeReserva("Número de quarto inválido! Deve ser um número inteiro positivo.")
 
-def validar_datas(data_entrada, data_saida):
-    try:
-        data_entrada = datetime.strptime(data_entrada, "%Y-%m-%d")
-        data_saida = datetime.strptime(data_saida, "%Y-%m-%d")
-    except ValueError:
-        raise ErroDeReserva("Data inválida! Use o formato AAAA-MM-DD.")
-
-    if data_saida < data_entrada:
-            raise ErroDeReserva("Data de saída não pode ser anterior à data de entrada.")
-
-    return data_entrada, data_saida
 
 # nao pode usar assim:
 # raise ErroDeReserva("deu erro...")

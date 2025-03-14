@@ -6,7 +6,7 @@ from function import gerar_quartos
 from datetime import datetime
 from typing import Optional  #ideia pra trazer melhor a documentaçao?
 from quarto import Quarto
-from exception import ErroDeReserva,validar_cpf,validar_numero_quarto,validar_datas
+from exception import ErroDeReserva,validar_cpf,validar_numero_quarto
 from tratarCorrida import lock
 class GerenciadorReservas:
 
@@ -19,40 +19,42 @@ class GerenciadorReservas:
 
     def realizar_reserva(self, cpf, num_quarto, data_entrada, data_saida):
         try:
-                # Validações
-                validar_cpf(cpf)
-                validar_numero_quarto(num_quarto)
-                data_entrada, data_saida = validar_datas(data_entrada, data_saida)
-
-                data_entrada = datetime.strptime(data_entrada, "%Y-%m-%d")
-                data_saida = datetime.strptime(data_saida, "%Y-%m-%d")
-                
-                usuario = None
-                usuario = self.hash_usuarios.get(cpf)
-                if usuario is None:
-                    usuario = User(nome="Usuário Padrão", cpf=cpf, telefone="0000-0000")
-                    self.hash_usuarios.insert(cpf, usuario)
-
-                # Buscando o quarto
-                quarto = None
-                if quarto is None:
-                    resposta = ErroDeReserva("Quarto não encontrado")
-
-                nova_reserva = Reserva(quarto, data_entrada, data_saida, usuario)
-                
-                for reserva in self.lista_reservas:
-                    if reserva.quarto == nova_reserva.quarto:
-                        if not (data_saida <= reserva.data_entrada or data_entrada >= reserva.data_saida):
-                            resposta =  ErroDeReserva(f"O quarto {num_quarto} já está reservado de {reserva.data_entrada} a {reserva.data_saida}.")
-
-                self.lista_reservas.inserir(nova_reserva)
-                print(self.lista_reservas)
-                quarto.disponibilidade = False  
-
-                return f"Reserva realizada com sucesso para o quarto {num_quarto}!"
+            validar_cpf(cpf)
+            data_entrada = datetime.strptime(data_entrada, "%Y-%m-%d")
+            data_saida = datetime.strptime(data_saida, "%Y-%m-%d")
             
+            usuario = None
+            usuario = self.hash_usuarios.get(cpf)
+            if usuario is None:
+                usuario = User(nome="Usuário Padrão", cpf=cpf, telefone="0000-0000")
+                self.hash_usuarios.insert(cpf, usuario)  
+                
         except ErroDeReserva as e:
             return f"Erro ao realizar reserva: {e}"
+
+        # Buscando o quarto
+        quarto = None
+        try:
+            quarto = self.hash_quartos.get(num_quarto)
+        except KeyError as e:
+            print("Quarto não encontrado", e)
+        if quarto is None:
+            raise ValueError("Quarto não encontrado!")
+
+    
+        nova_reserva = Reserva(quarto, data_entrada, data_saida, usuario)
+        
+       
+        for reserva in self.lista_reservas:
+            if reserva.quarto == nova_reserva.quarto:
+                if not (data_saida <= reserva.data_entrada or data_entrada >= reserva.data_saida):
+                    raise ValueError(f"O quarto {num_quarto} já está reservado de {reserva.data_entrada} a {reserva.data_saida}.")
+
+        self.lista_reservas.inserir(nova_reserva)
+        print(self.lista_reservas)
+        quarto.disponibilidade = False  
+
+        return f"Reserva realizada com sucesso para o quarto {num_quarto}!"
     
     def cancelar_reserva(self, cpf, num_quarto, data_entrada, data_saida):
         data_entrada = datetime.strptime(data_entrada, "%Y-%m-%d")

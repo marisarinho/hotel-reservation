@@ -2,7 +2,7 @@ import socket
 import sys
 
 class Cliente:
-    def __init__(self, host='0.0.0.0', porta=12345):
+    def __init__(self, host='127.0.0.1', porta=12345):
         self.host = host
         self.porta = porta
 
@@ -65,6 +65,9 @@ class Cliente:
 
  
 if __name__ == "__main__": 
+
+    host = '127.0.0.1'
+    porta = 12345  
 
     if len(sys.argv) > 1:
         host = sys.argv[1]
