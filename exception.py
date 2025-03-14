@@ -9,13 +9,7 @@ class ErroDeReserva(Exception):
     def __str__(self):
         return f"ErroDeReserva: {self.mensagem}"
 
-def validar_cpf(cpf):
-    if len(cpf) != 11:
-        raise ErroDeReserva("CPF inválido! Deve conter exatamente 11 dígitos numéricos.")
 
-    for char in cpf:
-        if char not in "0123456789":
-            raise ErroDeReserva("CPF inválido! Deve conter apenas números.")
         
 def validar_numero_quarto(num_quarto):
     try:

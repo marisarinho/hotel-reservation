@@ -1,15 +1,14 @@
 class Quarto:
     def __init__(self, num_quarto: int, preco: float, camas: int):
         self.__num_quarto = num_quarto  
-        self.__disponibilidade = True   
+
         self.__preco = preco  
         self.__camas = camas  
     
     def get_num_quarto(self):
         return self.__num_quarto
     
-    def get_disponibilidade(self):
-        return self.__disponibilidade
+    
     
     def get_preco(self):
         return self.__preco
@@ -17,8 +16,7 @@ class Quarto:
     def get_camas(self):
         return self.__camas
     
-    def set_disponibilidade(self, estado: bool):
-        self.__disponibilidade = estado
+    
     
     def __repr__(self):
         return f'Quarto(num_quarto={self.__num_quarto}, disponibilidade={self.__disponibilidade}, preco={self.__preco})'

@@ -4,7 +4,7 @@ from reserva import Reserva
 from listaOrd import Lista
 from function import gerar_quartos
 from datetime import datetime
-from typing import Optional  #ideia pra trazer melhor a documentaçao?
+from typing import Optional,List  #ideia pra trazer melhor a documentaçao?
 from quarto import Quarto
 from exception import ErroDeReserva,validar_cpf,validar_numero_quarto
 from tratarCorrida import lock
@@ -12,49 +12,51 @@ class GerenciadorReservas:
 
     def __init__(self):
         # Se der erro foi aqui (especificando os tipos)
-        self.hash_usuarios: HashTable[str, User] = HashTable(capacity=50)
-        self.hash_quartos: HashTable[str, Quarto] = HashTable(capacity=25)
-        self.lista_reservas: Lista[Reserva] = Lista()  
-        gerar_quartos(self.hash_quartos)  
+        self.__hash_hospedes: HashTable[str, User] = HashTable(capacity=50) # chave<cpf> : value <objeto Hospede>
+        self.__hash_quartos: HashTable[str, Quarto] = HashTable(capacity=25) # chave<numero_quarto> : value <objeto Quarto>
+        self.lista_reservas: Lista[Reserva] = Lista()  # Lista ordenada para armazenar as reservas. A chave da reserva é a data de entrada
+        gerar_quartos(self.__hash_quartos)  
 
-    def realizar_reserva(self, cpf, num_quarto, data_entrada, data_saida):
+    def realizar_reserva(self, cpf:str, num_quarto:int, data_entrada:datetime, data_saida:datetime):
+        '''
+        Método que realiza a reserva de um quarto no período especificado.
+
+        Parametros
+        -----------
+        cpf (str): o CPF do hóspede que está reservando o quarto
+        num_quarto (int):
+        data_entrada (datetime): Data de inicio da reserva no formato aaaa-mm-dd
+
+        Retorno
+        ------------
+        dizer o que retorna
+
+        Raises
+        -------------
+        ErroDeReserva: uma exceção quando o hospede não existir 
+        '''
         try:
-            validar_cpf(cpf)
+            hospede = self.__hash_hospedes[cpf]
             data_entrada = datetime.strptime(data_entrada, "%Y-%m-%d")
-            data_saida = datetime.strptime(data_saida, "%Y-%m-%d")
-            
-            usuario = None
-            usuario = self.hash_usuarios.get(cpf)
-            if usuario is None:
-                usuario = User(nome="Usuário Padrão", cpf=cpf, telefone="0000-0000")
-                self.hash_usuarios.insert(cpf, usuario)  
-                
-        except ErroDeReserva as e:
-            return f"Erro ao realizar reserva: {e}"
-
-        # Buscando o quarto
-        quarto = None
-        try:
-            quarto = self.hash_quartos.get(num_quarto)
-        except KeyError as e:
-            print("Quarto não encontrado", e)
-        if quarto is None:
-            raise ValueError("Quarto não encontrado!")
+            data_saida = datetime.strptime(data_saida, "%Y-%m-%d")  
+            quarto = self.__hash_quartos.[num_quarto]
+        except KeyError: # aqui temos uma exceção se a chave cpf não estive na hash de hospede
+            raise ErroDeReserva(f' Hospede de cpf {cpf} não cadastrado')
+        except ValueError as ve:
+            raise ErroDeReserva(ve.__str__())
 
     
-        nova_reserva = Reserva(quarto, data_entrada, data_saida, usuario)
-        
+        nova_reserva = Reserva(quarto, data_entrada, data_saida, hospede)        
        
         for reserva in self.lista_reservas:
             if reserva.quarto == nova_reserva.quarto:
                 if not (data_saida <= reserva.data_entrada or data_entrada >= reserva.data_saida):
-                    raise ValueError(f"O quarto {num_quarto} já está reservado de {reserva.data_entrada} a {reserva.data_saida}.")
+                    raise ErroDeReserva(f"O quarto {num_quarto} já está reservado de {reserva.data_entrada} a {reserva.data_saida}.")
 
         self.lista_reservas.inserir(nova_reserva)
         print(self.lista_reservas)
-        quarto.disponibilidade = False  
+        
 
-        return f"Reserva realizada com sucesso para o quarto {num_quarto}!"
     
     def cancelar_reserva(self, cpf, num_quarto, data_entrada, data_saida):
         data_entrada = datetime.strptime(data_entrada, "%Y-%m-%d")
@@ -67,18 +69,18 @@ class GerenciadorReservas:
                     reserva.data_entrada == data_entrada and
                     reserva.data_saida == data_saida):
                     self.lista_reservas.remover(self.lista_reservas.busca(reserva))  
-                    self.hash_quartos.get(num_quarto).set_disponibilidade(True) 
+                    self.__hash_quartos.get(num_quarto).set_disponibilidade(True) 
                     return f"Reserva do quarto {num_quarto} cancelada com sucesso."
             return "Reserva não encontrada ou dados incorretos."
 
 
     def buscar_usuario(self, cpf) -> Optional[User]: # Optional -> None ou [valor]
         try:
-            return self.hash_usuarios.get(cpf)  
+            return self.__hash_hospedes.get(cpf)  
         except KeyError:
             return None
         
-    def consultar_reserva(self, cpf) -> list[Reserva]:
+    def consultar_reserva(self, cpf) -> List[Reserva]:
         """
         Recebe o cpf como parametro e retorna as reservas,
         se não encontrado retornar uma lista vazia.
@@ -92,3 +94,6 @@ class GerenciadorReservas:
                 if reserva.user.cpf == cpf:
                     reservas.append(reserva)
             return reservas
+
+    def add_hospode(self,cpf) 
+        pass       
