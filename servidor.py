@@ -29,23 +29,21 @@ class Servidor:
     def lidar_com_cliente(self, conexao):
         while True:
             try:
-                dados = conexao.recv(1024).decode()
+                dados = conexao.recv(1024).decode().strip("\r\n")
                 if not dados:
                     break
-
-                dados = dados.strip("\r\n")
                 
                 comando = dados.split()
                 resposta = "Comando inválido."
 
                 if comando[0] == "RESERVAR" and len(comando) >= 4:
-                    cpf, num_quarto, data_entrada , data_saida = comando[1], int(comando[2]), comando[3] , comando[4]
-                    resposta = self.gerenciador.realizar_reserva(cpf, num_quarto,data_entrada,data_saida)
+                    cpf, num_quarto, data_entrada, data_saida = comando[1], int(comando[2]), comando[3], comando[4]
+                    resposta = self.gerenciador.realizar_reserva(cpf, num_quarto, data_entrada, data_saida)
                 
                 elif comando[0] == "CANCELAR" and len(comando) >= 4:
                     cpf, num_quarto, data_entrada, data_saida = comando[1], int(comando[2]), comando[3], comando[4]
-                    resposta = self.gerenciador.cancelar_reserva(cpf, num_quarto,data_entrada,data_saida)
-
+                    resposta = self.gerenciador.cancelar_reserva(cpf, num_quarto, data_entrada, data_saida)
+                
                 elif comando[0] == "CONSULTAR" and len(comando) >= 1:
                     cpf = comando[1]
                     usuario = self.gerenciador.buscar_usuario(cpf)
@@ -53,15 +51,13 @@ class Servidor:
                         resposta = '0'
                     else:
                         reservas = self.gerenciador.consultar_reserva(cpf)
-                        if len(reservas) == 0:
+                        if not reservas:
                             resposta = "Sem reservas"
                         else:
                             resposta = f"Usuário: {usuario.cpf}, Nome: {usuario.nome}, Telefone: {usuario.telefone}, Reservas: \n"
-
                             for reserva in reservas:
-                                resposta +=  f"Quarto: {reserva.quarto.num_quarto}, Data de entrada: {reserva.data_entrada}, Data de saída: {reserva.data_saida} \n"
-
-
+                                resposta +=  f"Quarto: {reserva.quarto.get_num_quarto()}, Data de entrada: {reserva.data_entrada}, Data de saída: {reserva.data_saida} \n"
+                
                 elif comando[0] == "SAIR":
                     conexao.close()
                     return
@@ -69,7 +65,6 @@ class Servidor:
                 conexao.send(resposta.encode())
             except Exception as e:
                 conexao.send(f"Erro: {str(e)}".encode())
-
 
 
 if __name__ == "__main__":

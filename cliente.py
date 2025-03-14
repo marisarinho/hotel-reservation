@@ -1,7 +1,8 @@
 import socket
+import sys
 
 class Cliente:
-    def __init__(self, host='localhost', porta=12345):
+    def __init__(self, host='0.0.0.0', porta=12345):
         self.host = host
         self.porta = porta
 
@@ -64,7 +65,12 @@ class Cliente:
 
  
 if __name__ == "__main__": 
-    porta = int(input("Digite a porta do servidor: "))  # Pergunta ao usuário a porta
-    cliente = Cliente(porta=porta)
+
+    if len(sys.argv) > 1:
+        host = sys.argv[1]
+    if len(sys.argv) > 2:
+        porta = int(sys.argv[2])
+    
+    cliente = Cliente(host=host, porta=porta)
     cliente.conectar()
     cliente.menu()
