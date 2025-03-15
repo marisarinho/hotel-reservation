@@ -36,13 +36,27 @@ class Servidor:
                 comando = dados.split()
                 mensagem = "Comando inválido."
 
+                # if comando[0] == "CADASTRAR" and len(comando) >= 4:
+                #     cpf, nome, telefone = comando[1], comando[2], comando[3]
+                #     try:
+                #         resposta = self.gerenciador.add_hospede(cpf, nome, telefone)
+                #         # mensagem = f"\nHóspede {nome} cadastrado com sucesso!"
+                #         mensagem = f'200 OK ({self.gerenciador.mostrar_hospede()}'
+                #     except Exception as e:
+                #         mensagem = f"Erro- 500\n ao cadastrar hóspede: {str(e)}"
+                
                 if comando[0] == "CADASTRAR" and len(comando) >= 4:
                     cpf, nome, telefone = comando[1], comando[2], comando[3]
-                    try:
-                        resposta = self.gerenciador.add_hospede(cpf, nome, telefone)
-                        mensagem = f"200 OK\nHóspede {nome} cadastrado com sucesso!"
+                    print(f"Chamando add_hospede com CPF: {cpf}, Nome: {nome}, Telefone: {telefone}")
+
+                    try:    
+                    
+                            resposta = self.gerenciador.add_hospede(cpf, nome, telefone)
+                            # Agora mostramos os hóspedes cadastrados corretamente
+                            mensagem = f"200 OK\nHóspede {nome} cadastrado com sucesso!\n{self.gerenciador.mostrar_hospede()}"
                     except Exception as e:
-                        mensagem = f"Erro- 500\n ao cadastrar hóspede: {str(e)}"
+                            mensagem = f"Erro- 500\nAo cadastrar hóspede: {str(e)}"
+
                 
                 elif comando[0] == "RESERVAR" and len(comando) >= 5:
                     cpf, num_quarto, data_entrada, data_saida = comando[1], int(comando[2]), comando[3], comando[4]

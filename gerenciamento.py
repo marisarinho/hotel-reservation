@@ -89,6 +89,12 @@ class GerenciadorReservas:
         for chave, valor in self.__hash_quartos.items():  # Se for um dicionário
             print(f"Quarto {chave}: {valor}")
 
+    def mostrar_hospede(self):
+        hospedes_lista = "Hospedes cadastrados:\n"
+        for chave, valor in self.__hash_hospedes.items():  # Se for um dicionário
+            hospedes_lista += f"Hóspede {chave}: {valor}\n"
+        return hospedes_lista
+
     
     def cancelar_reserva(self, cpf:str, num_quarto:int, data_entrada:datetime, data_saida:datetime):
         '''
@@ -190,6 +196,7 @@ class GerenciadorReservas:
         digito2 = 0 if resto == 10 else resto
 
         if int(cpf[9]) != digito1 or int(cpf[10]) != digito2:
+            # print(f"Erro: CPF {cpf} com dígitos verificadores inválidos.") #testando
             raise ErroDeReserva("CPF inválido! Dígitos verificadores não conferem.")
 
         return True
@@ -208,20 +215,22 @@ class GerenciadorReservas:
         ------------
         str: Mensagem confirmando o cadastro do hóspede.
         """
+        print('começo')
         try:
             # Validações
             #uma ou duas underlines?
             #self.__validar_cpf(cpf)5
             self.validar_cpf(cpf)
-
             # Verifica se o CPF já está cadastrado
             if cpf in self.__hash_hospedes:
                 raise ErroDeReserva("Hóspede já cadastrado.")
-            
+            print('aqui 2')
             novo_hospede = Hospede(nome, cpf, telefone)
             self.__hash_hospedes[cpf] = novo_hospede
-            #ajeitar esse return
-            return f'Hóspede {nome} cadastrado com sucesso.'
+            print(f"Hóspede {nome} cadastrado. Hash dos hóspedes: {self.__hash_hospedes}")
+        
+
         
         except ErroDeReserva as e:
             return str(e) 
+        print('fim')

@@ -31,7 +31,6 @@ class Cliente:
             print("2. Fazer reserva")
             print("3. Cancelar reserva")
             print("4. Consultar reserva por CPF")
-            print("6. add quarto")
             print("5. Sair")
 
             opcao = input("Escolha uma opção: ")
@@ -61,12 +60,6 @@ class Cliente:
                 ano = input("Digite o ano da reserva: ")
                 self.enviar_requisicao(f"CONSULTAR {cpf} {ano}")
 
-            elif opcao == "6":
-                num_quarto = int(input("Digite o número do quarto: "))
-                preco = float(input("Digite o preço do quarto: "))
-                camas = int(input("Digite o número de camas: "))
-                self.enviar_requisicao(f"ADICIONAR {num_quarto} {preco} {camas}")
-                
                 
             elif opcao == "5":
                 print("Encerrando conexão...")
