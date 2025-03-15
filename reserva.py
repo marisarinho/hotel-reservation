@@ -15,7 +15,8 @@ class Reserva:
     def __eq__(self, other):
         return self.__data_entrada == other.data_entrada  # Igualdade apenas pela data de entrada
     
-    
+
+
     def __str__(self):
         return f"Reserva(quarto={self.__quarto}, periodo = {self.__data_entrada} ate {self.__data_saida}, user={self.__hospede})"
     
@@ -34,5 +35,7 @@ class Reserva:
     def get_hospede(self):
         return self.__hospede
 
-    
+    def get_ano(self):
+        # Extraindo o ano da data no formato 'DD/MM/YYYY'
+        return self.__data_entrada.split("/")[0]
  

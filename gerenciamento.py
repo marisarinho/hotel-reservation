@@ -84,6 +84,7 @@ class GerenciadorReservas:
     # def mostrar_quartos(self):
     #     """Retorna a hashtable com os quartos."""
     #     return self.__hash_quartos
+    
     def mostrar_quartos(self):
         print("Quartos cadastrados:")
         for chave, valor in self.__hash_quartos.items():  # Se for um dicionário
@@ -96,39 +97,39 @@ class GerenciadorReservas:
         return hospedes_lista
 
     
-    def cancelar_reserva(self, cpf:str, num_quarto:int, data_entrada:datetime, data_saida:datetime):
-        '''
-        Método que cancela uma reserva existente no período especificado.
+    # def cancelar_reserva(self, cpf:str, num_quarto:int, data_entrada:datetime, data_saida:datetime):
+    #     '''
+    #     Método que cancela uma reserva existente no período especificado.
 
-        Parâmetros
-        -----------
-        cpf (str): O CPF do hóspede que realizou a reserva.
-        num_quarto (int): O número do quarto reservado.
-        data_entrada (datetime): Data de início da reserva no formato aaaa-mm-dd.
-        data_saida (datetime): Data de término da reserva no formato aaaa-mm-dd.
+    #     Parâmetros
+    #     -----------
+    #     cpf (str): O CPF do hóspede que realizou a reserva.
+    #     num_quarto (int): O número do quarto reservado.
+    #     data_entrada (datetime): Data de início da reserva no formato aaaa-mm-dd.
+    #     data_saida (datetime): Data de término da reserva no formato aaaa-mm-dd.
 
-        Retorno
-        ------------
-        nada eu acho
+    #     Retorno
+    #     ------------
+    #     nada eu acho
 
-        Raises
-        -------------
-        ErroDeReserva: Exceção levantada quando o hóspede não possui reservas ou os
-        dados fornecidos estão incorretos.
-        '''
-        data_entrada = datetime.strptime(data_entrada, "%Y-%m-%d")
-        data_saida = datetime.strptime(data_saida, "%Y-%m-%d")
+    #     Raises
+    #     -------------
+    #     ErroDeReserva: Exceção levantada quando o hóspede não possui reservas ou os
+    #     dados fornecidos estão incorretos.
+    #     '''
+    #     data_entrada = datetime.strptime(data_entrada, "%Y-%m-%d")
+    #     data_saida = datetime.strptime(data_saida, "%Y-%m-%d")
 
-        with lock:  
-            reservas_usuario = self.consultar_reserva(cpf)
-            for reserva in reservas_usuario:
-                if (reserva.__quarto[num_quarto] == num_quarto and
-                    reserva.__data_entrada == data_entrada and
-                    reserva.__data_saida == data_saida):
-                    self.lista_reservas.remover(self.lista_reservas.busca(reserva))  
-                    self.__hash_quartos[num_quarto]
+    #     with lock:  
+    #         reservas_usuario = self.consultar_reserva(cpf)
+    #         for reserva in reservas_usuario:
+    #             if (reserva.__quarto[num_quarto] == num_quarto and
+    #                 reserva.__data_entrada == data_entrada and
+    #                 reserva.__data_saida == data_saida):
+    #                 self.lista_reservas.remover(self.lista_reservas.busca(reserva))  
+    #                 self.__hash_quartos[num_quarto]
 
-            return "Reserva não encontrada ou dados incorretos."
+    #         return "Reserva não encontrada ou dados incorretos."
 
 
     def buscar_usuario(self, cpf:str) -> Optional[Hospede]: # Optional -> None ou [valor]
@@ -149,7 +150,11 @@ class GerenciadorReservas:
         except KeyError:
             return None
         
-    def consultar_reserva(self, cpf: str, ano: int) -> List[Reserva]:
+    def get_ano(self):
+        # Extraindo o ano da data no formato 'DD/MM/YYYY'
+        return self.__data_entrada.split("/")[0]
+    
+    def consultar_reservas(self, ano: int, cpf: str) -> List[Reserva]:
         '''
         Método que consulta todas as reservas associadas a um determinado CPF em um ano específico.
 
@@ -167,16 +172,13 @@ class GerenciadorReservas:
         -------------
         Nenhuma exceção é levantada. Se o hóspede não for encontrado, uma lista vazia será retornada.
         '''
-        usuario_encontrado = self.buscar_usuario(cpf)
-        if not usuario_encontrado:
-            return []
-
-        with lock:
-            reservas = [
-                reserva for reserva in self.lista_reservas
-                if reserva.get_hospede().get_cpf() == cpf and reserva.get_data_entrada().year == ano
-            ]
-            return reservas
+        
+        # Filtra as reservas pelo ano e CPF
+        reservas_filtradas = [
+            reserva for reserva in self.__reservas 
+            if reserva.get_ano() == ano and reserva.cpf == cpf
+        ]
+        return reservas_filtradas
 
 
     def validar_cpf(self, cpf: str):
@@ -215,7 +217,7 @@ class GerenciadorReservas:
         ------------
         str: Mensagem confirmando o cadastro do hóspede.
         """
-        print('começo')
+
         try:
             # Validações
             #uma ou duas underlines?
@@ -224,13 +226,11 @@ class GerenciadorReservas:
             # Verifica se o CPF já está cadastrado
             if cpf in self.__hash_hospedes:
                 raise ErroDeReserva("Hóspede já cadastrado.")
-            print('aqui 2')
             novo_hospede = Hospede(nome, cpf, telefone)
             self.__hash_hospedes[cpf] = novo_hospede
-            print(f"Hóspede {nome} cadastrado. Hash dos hóspedes: {self.__hash_hospedes}")
         
 
         
         except ErroDeReserva as e:
             return str(e) 
-        print('fim')
+    
