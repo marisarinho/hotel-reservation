@@ -11,27 +11,27 @@ class ErroDeReserva(Exception):
 
 
     #pq aqui n ta funcionando duas underlines
-    def validar_cpf(self,cpf:str):
+    # def __validar_cpf(self,cpf:str):
         
-        cpf = ''.join(filter(str.isdigit, cpf))
+    #     cpf = ''.join(filter(str.isdigit, cpf))
 
-        if len(cpf) != 11:
-            raise ErroDeReserva("CPF inválido! Deve conter exatamente 11 dígitos numéricos.")
-        if cpf == cpf[0] * 11:
-            raise ErroDeReserva("CPF inválido! Não pode conter todos os dígitos iguais.")
+    #     if len(cpf) != 11:
+    #         raise ErroDeReserva("CPF inválido! Deve conter exatamente 11 dígitos numéricos.")
+    #     if cpf == cpf[0] * 11:
+    #         raise ErroDeReserva("CPF inválido! Não pode conter todos os dígitos iguais.")
     
-        soma = sum(int(cpf[i]) * (10 - i) for i in range(9))
-        resto = (soma * 10) % 11
-        digito1 = 0 if resto == 10 else resto
+    #     soma = sum(int(cpf[i]) * (10 - i) for i in range(9))
+    #     resto = (soma * 10) % 11
+    #     digito1 = 0 if resto == 10 else resto
 
-        soma = sum(int(cpf[i]) * (11 - i) for i in range(10))
-        resto = (soma * 10) % 11
-        digito2 = 0 if resto == 10 else resto
+    #     soma = sum(int(cpf[i]) * (11 - i) for i in range(10))
+    #     resto = (soma * 10) % 11
+    #     digito2 = 0 if resto == 10 else resto
 
-        if int(cpf[9]) != digito1 or int(cpf[10]) != digito2:
-            raise ErroDeReserva("CPF inválido! Dígitos verificadores não conferem.")
+    #     if int(cpf[9]) != digito1 or int(cpf[10]) != digito2:
+    #         raise ErroDeReserva("CPF inválido! Dígitos verificadores não conferem.")
 
-        return True 
+    #     return True 
         
     def validar_numero_quarto(self,num_quarto:int):
         try:

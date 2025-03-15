@@ -3,7 +3,7 @@ import threading
 import sys
 from gerenciamento import GerenciadorReservas
 from exception import ErroDeReserva
-from quarto import Quarto 
+
 
 class Servidor:
 
@@ -11,9 +11,8 @@ class Servidor:
         self.host = host
         self.porta = porta
         self.gerenciador = GerenciadorReservas()
-      
        
-        
+    
     def start(self):
         servidor_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         servidor_socket.bind((self.host, self.porta))
@@ -64,7 +63,7 @@ class Servidor:
                 elif comando[0] == "ADICIONAR" and len(comando)>=4:
                     num_quarto,preco,cama = int(comando[1]),comando[2],comando[3]
                     self.gerenciador.adicionar_quarto(num_quarto,preco,cama)
-                    mensagem = f'{print(self.hash.quarto)}'
+                    mensagem = f'({self.gerenciador.mostrar_quartos()}'
 
                 elif comando[0] == "CONSULTAR" and len(comando) >= 3:
                     cpf = comando[1]

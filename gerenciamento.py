@@ -14,7 +14,8 @@ class GerenciadorReservas:
     def __init__(self):
         # Se der erro foi aqui (especificando os tipos)
         self.__hash_hospedes: HashTable[str, Hospede] = HashTable() # chave<cpf> : value <objeto Hospede>
-        self.hash_quartos: HashTable[str, Quarto] = HashTable() # chave<numero_quarto> : value <objeto Quarto>
+        self.__hash_quartos: HashTable[str, Quarto] = HashTable() # chave<numero_quarto> : value <objeto Quarto>
+        #lista tb vai ficar privado provavelmtente
         self.lista_reservas: Lista[Reserva] = Lista()  # Lista ordenada para armazenar as reservas. A chave da reserva é a data de entrada
         gerar_quartos(self.__hash_quartos)  
 
@@ -79,6 +80,15 @@ class GerenciadorReservas:
             novo_quarto = Quarto(num_quarto, preco, camas)
             self.__hash_quartos[num_quarto] = novo_quarto
             #return f"Quarto {num_quarto} adicionado com sucesso."
+
+    # def mostrar_quartos(self):
+    #     """Retorna a hashtable com os quartos."""
+    #     return self.__hash_quartos
+    def mostrar_quartos(self):
+        print("Quartos cadastrados:")
+        for chave, valor in self.__hash_quartos.items():  # Se for um dicionário
+            print(f"Quarto {chave}: {valor}")
+
     
     def cancelar_reserva(self, cpf:str, num_quarto:int, data_entrada:datetime, data_saida:datetime):
         '''
@@ -162,6 +172,28 @@ class GerenciadorReservas:
             ]
             return reservas
 
+
+    def validar_cpf(self, cpf: str):
+        cpf = ''.join(filter(str.isdigit, cpf))
+
+        if len(cpf) != 11:
+            raise ErroDeReserva("CPF inválido! Deve conter exatamente 11 dígitos numéricos.")
+        if cpf == cpf[0] * 11:
+            raise ErroDeReserva("CPF inválido! Não pode conter todos os dígitos iguais.")
+
+        soma = sum(int(cpf[i]) * (10 - i) for i in range(9))
+        resto = (soma * 10) % 11
+        digito1 = 0 if resto == 10 else resto
+
+        soma = sum(int(cpf[i]) * (11 - i) for i in range(10))
+        resto = (soma * 10) % 11
+        digito2 = 0 if resto == 10 else resto
+
+        if int(cpf[9]) != digito1 or int(cpf[10]) != digito2:
+            raise ErroDeReserva("CPF inválido! Dígitos verificadores não conferem.")
+
+        return True
+    
     def add_hospede(self, cpf: str, nome: str, telefone: str):
         """
         Método para adicionar um hóspede ao sistema.
@@ -179,7 +211,8 @@ class GerenciadorReservas:
         try:
             # Validações
             #uma ou duas underlines?
-            self._validar_cpf(cpf)
+            #self.__validar_cpf(cpf)5
+            self.validar_cpf(cpf)
 
             # Verifica se o CPF já está cadastrado
             if cpf in self.__hash_hospedes:
