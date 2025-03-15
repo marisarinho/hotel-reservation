@@ -11,28 +11,52 @@ class Servidor:
         self.host = host
         self.porta = porta
         self.gerenciador = GerenciadorReservas()
-       
+        self.servidor_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.clients = []
     
     def start(self):
-        servidor_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        servidor_socket.bind((self.host, self.porta))
-        servidor_socket.listen(5)
+        self.servidor_socket.bind((self.host, self.porta))
+        self.servidor_socket.listen(5)
         print("Servidor iniciado.")
-
+        threading.Thread(target=self.__parar_servidor, daemon=True).start()
         while True:
-            conexao, endereco = servidor_socket.accept()
-            print(f"Cliente conectado: {endereco}")
-            thread_cliente = threading.Thread(target=self.lidar_com_cliente, args=(conexao,))
-            thread_cliente.start()
+            try:
+                conexao, endereco = self.servidor_socket.accept()
+                print(f"Cliente conectado: {endereco}")
+                self.clients.append(conexao)
+                thread_cliente = threading.Thread(target=self.lidar_com_cliente, args=(conexao,))
+                thread_cliente.start()
+            except (OSError, KeyboardInterrupt):
+                break
 
+
+    def __parar_servidor(self) -> None:
+        while True:
+            print("Digite 'q' para encerrar o servidor.")
+            try:
+                command = input()
+            except EOFError:
+                command = 'q'
+                
+            if command.strip().lower() == 'q':
+                print("Encerrando servidor...")
+                break
+
+        for client in self.clients:
+            client.close()
+        self.servidor_socket.close()
 
     def lidar_com_cliente(self, conexao):
         while True:
             try:
                 dados = conexao.recv(1024).decode().strip("\r\n")
-                if not dados:
-                    break
-                
+            except ConnectionAbortedError:
+                break
+        
+            if not dados:
+                break
+            
+            try:
                 comando = dados.split()
                 mensagem = "Comando inválido."
                 
@@ -97,7 +121,7 @@ class Servidor:
                     return
 
                 conexao.send(mensagem.encode())
-            
+        
             except Exception as e:
                 conexao.send(f"500| Erro interno: {str(e)}".encode())
 
