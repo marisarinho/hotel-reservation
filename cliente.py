@@ -16,10 +16,18 @@ class Cliente:
     #     print("Resposta do servidor:", resposta)
 
     def enviar_requisicao(self, mensagem):
-        mensagem += "\r\n" # Adiciona o terminador conforme exigido
+        mensagem += "\r\n"  # Adiciona o terminador correto
         self.cliente_socket.send(mensagem.encode())  
         resposta = self.cliente_socket.recv(1024).decode()
-        print("Resposta do servidor:", resposta)
+
+        partes = resposta.split("|", 1)
+        if len(partes) == 2:
+            codigo, mensagem = partes
+          
+            print("\n📩 Resposta do servidor:\n" + mensagem)
+        else:
+            print("\n⚠ Erro inesperado no formato da resposta.")
+
 
 
     def fechar_conexao(self):

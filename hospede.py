@@ -1,5 +1,7 @@
-class User:
-    def __init__(self, nome, cpf, telefone):
+from exception import ErroDeReserva
+
+class Hospede:
+    def __init__(self, nome:str, cpf:str, telefone:int):
         self.nome = nome
 
         if not self.__validar_cpf(cpf):
