@@ -13,7 +13,7 @@ class Hospede:
     def __str__(self):
         return f"{self.nome} {self.cpf} {self.telefone}"
 
-    def __validar_cpf(cpf)->bool:
+    def __validar_cpf(self,cpf:str)->bool:
         if len(cpf) != 11:
             return False
 
@@ -22,4 +22,4 @@ class Hospede:
                 return False
         
         return True
-        
+    

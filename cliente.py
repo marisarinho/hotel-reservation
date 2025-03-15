@@ -16,19 +16,10 @@ class Cliente:
     #     print("Resposta do servidor:", resposta)
 
     def enviar_requisicao(self, mensagem):
-        mensagem += "\r\n"  # Adiciona o terminador correto
+        mensagem += "\r\n" # Adiciona o terminador conforme exigido
         self.cliente_socket.send(mensagem.encode())  
         resposta = self.cliente_socket.recv(1024).decode()
-
-        partes = resposta.split("|", 1)
-        if len(partes) == 2:
-            codigo, mensagem = partes
-          
-            print("\n📩 Resposta do servidor:\n" + mensagem)
-        else:
-            print("\n⚠ Erro inesperado no formato da resposta.")
-
-
+        print("📩 Resposta do servidor:", resposta)
 
     def fechar_conexao(self):
         self.cliente_socket.close()
@@ -36,33 +27,48 @@ class Cliente:
     def menu(self):
         while True:
             print("\n--- Sistema de Reservas ---")
-            print("1. Fazer reserva")
-            print("2. Cancelar reserva")
-            print("3. Consultar reserva por CPF")
-            print("4. Sair")
+            print("1. Cadastrar hóspede")
+            print("2. Fazer reserva")
+            print("3. Cancelar reserva")
+            print("4. Consultar reserva por CPF")
+            print("6. add quarto")
+            print("5. Sair")
 
             opcao = input("Escolha uma opção: ")
 
             if opcao == "1":
                 cpf = input("Digite seu CPF: ")
+                nome = input("Digite seu nome: ")
+                telefone = input("Digite seu telefone: ")
+                self.enviar_requisicao(f"CADASTRAR {cpf} {nome} {telefone}")
+            
+            elif opcao == "2":
+                cpf = input("Digite seu CPF: ")
                 num_quarto = input("Número do quarto: ")
                 data_entrada = input("Data de entrada (ex: 2025-03-15):")
-                data_saida = input("Data de saida (ex: 2025-03-15):")
+                data_saida = input("Data de saída (ex: 2025-03-15):")
                 self.enviar_requisicao(f"RESERVAR {cpf} {num_quarto} {data_entrada} {data_saida}")
 
-            elif opcao == "2":
+            elif opcao == "3":
                 cpf = input("Digite seu CPF: ")
                 num_quarto = input("Número do quarto para cancelar: ")
                 data_entrada = input("Data de entrada (ex: 2025-03-15):")
-                data_saida = input("Data de saida (ex: 2025-03-15):")
+                data_saida = input("Data de saída (ex: 2025-03-15):")
                 self.enviar_requisicao(f"CANCELAR {cpf} {num_quarto} {data_entrada} {data_saida}")
 
-        
-            elif opcao == "3":
-                cpf = input("Digite seu CPF: ")
-                self.enviar_requisicao(f"CONSULTAR {cpf}")
-
             elif opcao == "4":
+                cpf = input("Digite seu CPF: ")
+                ano = input("Digite o ano da reserva: ")
+                self.enviar_requisicao(f"CONSULTAR {cpf} {ano}")
+
+            elif opcao == "6":
+                num_quarto = int(input("Digite o número do quarto: "))
+                preco = float(input("Digite o preço do quarto: "))
+                camas = int(input("Digite o número de camas: "))
+                self.enviar_requisicao(f"ADICIONAR {num_quarto} {preco} {camas}")
+                
+                
+            elif opcao == "5":
                 print("Encerrando conexão...")
                 self.fechar_conexao()
                 break
@@ -71,7 +77,6 @@ class Cliente:
                 print("Opção inválida, tente novamente.")
 
 
- 
 if __name__ == "__main__": 
 
     host = '127.0.0.1'
