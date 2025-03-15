@@ -1,7 +1,7 @@
-from hashTable import HashTable
+from estruturas.hashTable import HashTable
 from hospede import Hospede
 from reserva import Reserva
-from listaOrd import Lista
+from estruturas.listaOrd import Lista
 from function import gerar_quartos
 from datetime import datetime
 from typing import Optional,List 
@@ -228,9 +228,8 @@ class GerenciadorReservas:
                 raise ErroDeReserva("Hóspede já cadastrado.")
             novo_hospede = Hospede(nome, cpf, telefone)
             self.__hash_hospedes[cpf] = novo_hospede
-        
 
-        
+
         except ErroDeReserva as e:
             return str(e) 
     
