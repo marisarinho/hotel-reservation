@@ -2,7 +2,7 @@ from estruturas.hashTable import HashTable
 from hospede import Hospede
 from reserva import Reserva
 from estruturas.listaOrd import Lista
-from function import gerar_quartos
+from gerar_quartos import gerar_quartos
 from datetime import datetime
 from typing import Optional,List 
 from quarto import Quarto
@@ -17,7 +17,7 @@ class GerenciadorReservas:
         self.__reservas: Lista[Reserva] = Lista()  # Lista ordenada para armazenar as reservas. A chave da reserva é a data de entrada
         gerar_quartos(self.__quartos)
 
-    def realizar_reserva(self, cpf:str, num_quarto:int, data_entrada: str, data_saida: str):
+    def realizar_reserva(self, cpf:str, num_quarto:int, data_entrada: str, data_saida: str) -> None:
         '''
         Método que realiza a reserva de um quarto no período especificado.
 
@@ -30,7 +30,7 @@ class GerenciadorReservas:
 
         Retorno
         ------------
-        dizer o que retorna
+        None
 
         Raises
         -------------
@@ -62,7 +62,7 @@ class GerenciadorReservas:
                             f"O quarto {num_quarto} já está reservado de {reserva.data_entrada} a {reserva.data_saida}.")
             self.__reservas.inserir(nova_reserva)
         
-    def adicionar_quarto(self, num_quarto: int, preco: float, camas: int):
+    def adicionar_quarto(self, num_quarto: int, preco: float, camas: int) -> None:
         """
         Método para adicionar um novo quarto manualmente.
 
@@ -74,7 +74,11 @@ class GerenciadorReservas:
 
         Retorno:
         ------------
-        str: Mensagem confirmando a adição do quarto.
+        None
+        
+        Raises
+        -------------
+        ErroDeReserva: uma exceção quando o quarto já existir 
         """
         with lock:
             if num_quarto in self.__quartos:

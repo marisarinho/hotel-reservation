@@ -11,10 +11,13 @@ class Cliente:
         self.nome = nome
         self.cpf = cpf
 
-    def __eq__(self, other: "Cliente") -> bool:
-        return self.cpf == other.cpf
+    def __eq__(self, outro: "Cliente") -> bool:
+        return self.cpf == outro.cpf
 
-    def esta_logado(self):
+    def esta_logado(self) -> bool:
+        """ 
+        Método que verifica se o usuário está logado.
+        """
         return self.nome != "" and self.cpf != ""
 
 class Servidor:
@@ -27,6 +30,10 @@ class Servidor:
         self.clients: list[Cliente] = []
     
     def start(self):
+        """ 
+        Metódo usado para iniciar o servidor.
+        """
+        
         self.servidor_socket.bind((self.host, self.porta))
         self.servidor_socket.listen(5)
         print("Servidor iniciado.")
@@ -44,6 +51,10 @@ class Servidor:
 
 
     def __parar_servidor(self) -> None:
+        """ 
+        Método usado para parar o servidor.
+        """
+        
         while True:
             print("Digite 'q' para encerrar o servidor.")
             try:
@@ -60,6 +71,14 @@ class Servidor:
         self.servidor_socket.close()
 
     def lidar_com_cliente(self, cliente: Cliente):
+        """ 
+        Metódo usado para lidar com clientes em thread.
+
+        Parametros
+        -----------
+        cliente (Cliente): objeto Cliente.
+        """
+        
         while True:
             try:
                 dados = cliente.socket.recv(1024).decode().strip("\r\n")
@@ -98,10 +117,10 @@ class Servidor:
                         if cliente.esta_logado():
                             raise ErroDeReserva("Você já está logado.")
                         
-                        if not hospede or hospede.senha != senha:
+                        if not hospede or hospede.__senha != senha:
                             raise ErroDeReserva("CPF ou senha errados.")
 
-                        cliente.nome = hospede.nome
+                        cliente.nome = hospede.__nome
                         cliente.cpf = cpf
                         mensagem = f"200 OK\nHóspede {cliente.nome} logado com sucesso!"         
                     except Exception as e:
@@ -154,9 +173,9 @@ class Servidor:
                         
                         reservas = self.gerenciador.consultar_reserva(cliente.cpf, ano)
                         if not reservas:
-                            raise ErroDeReserva(f"Usuário {usuario.nome} (CPF: {cliente.cpf}) está cadastrado, mas não possui reservas.")
+                            raise ErroDeReserva(f"Usuário {usuario.__nome} (CPF: {cliente.cpf}) está cadastrado, mas não possui reservas.")
                         
-                        mensagem = f"200 OK\n Reservas para {usuario.nome} (CPF: {cliente.cpf}):\n"
+                        mensagem = f"200 OK\n Reservas para {usuario.__nome} (CPF: {cliente.cpf}):\n"
                         for reserva in reservas:
                             mensagem += f"- Quarto {reserva.quarto.num_quarto}, Entrada: {reserva.data_entrada}, Saída: {reserva.data_saida}\n"
 

@@ -1,20 +1,52 @@
 from exception import ErroDeReserva
 
 class Hospede:
-    def __init__(self, nome:str, cpf:str, telefone:int, senha:str):
-        self.nome = nome
+    def __init__(self, nome :str, cpf: str, telefone: str, senha: str):
+        self.__nome = nome
 
         if not self.__cpf_valido(cpf):
             raise ErroDeReserva('CPF inválido')
             
-        self.cpf = cpf
-        self.telefone = telefone
-        self.senha = senha
+        self.__cpf = cpf
+        self.__telefone = telefone
+        self.__senha = senha
 
     def __str__(self):
-        return f"{self.nome} {self.cpf} {self.telefone}"
+        return f"{self.__nome} {self.__cpf} {self.__telefone}"
+
+    @property
+    def nome(self) -> str:
+        return self.__nome
+    
+    @property
+    def cpf(self) -> str:
+        return self.__cpf
+    
+    @property
+    def telefone(self) -> str:
+        return self.__telefone
+    
+    @property
+    def senha(self) -> str:
+        return self.__senha
 
     def __cpf_valido(self, cpf: str) -> bool:
+        """ 
+        Método que verifica se um cpf é válido.
+
+        Parametros
+        -----------
+        cpf (str): o CPF do hóspede
+
+        Retorno
+        ------------
+        Valor booleano (True ou False)
+
+        Raises
+        -------------
+        Nenhuma exceção
+        """
+        
         cpf = ''.join(filter(str.isdigit, cpf))
 
         if len(cpf) != 11:
