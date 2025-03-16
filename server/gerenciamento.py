@@ -12,10 +12,8 @@ from tratarCorrida import lock
 class GerenciadorReservas:
 
     def __init__(self):
-        # Se der erro foi aqui (especificando os tipos)
         self.__hospedes: HashTable[str, Hospede] = HashTable() # chave<cpf> : value <objeto Hospede>
         self.__quartos: HashTable[str, Quarto] = HashTable() # chave<numero_quarto> : value <objeto Quarto>
-        #lista tb vai ficar privado provavelmtente
         self.__reservas: Lista[Reserva] = Lista()  # Lista ordenada para armazenar as reservas. A chave da reserva é a data de entrada
         gerar_quartos(self.__quartos)
 
@@ -48,12 +46,6 @@ class GerenciadorReservas:
                 data_saida = datetime.strptime(data_saida, "%d/%m/%Y")  
             except ValueError:
                 raise ErroDeReserva("Formato inválido!")
-            
-            #MARK:realizar reserva 
-            """ 
-            Quando quarto nao é encontrado acaba caindo no 
-            mesmo erro de Hospede de cpf {cpf} não cadastrado
-            """
             
             try:
                 quarto = self.__quartos[num_quarto] 
@@ -90,12 +82,7 @@ class GerenciadorReservas:
             
             novo_quarto = Quarto(num_quarto, preco, camas)
             self.__quartos[num_quarto] = novo_quarto
-            #return f"Quarto {num_quarto} adicionado com sucesso."
 
-    # def mostrar_quartos(self):
-    #     """Retorna a hashtable com os quartos."""
-    #     return self.__hash_quartos
-    
     def mostrar_quartos(self):
         print("Quartos cadastrados:")
         for chave, valor in self.__quartos.items():  # Se for um dicionário

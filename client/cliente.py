@@ -10,11 +10,6 @@ class Cliente:
         self.cliente_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.cliente_socket.connect((self.host, self.porta))
 
-    # def enviar_requisicao(self, mensagem):
-    #     self.cliente_socket.send(mensagem.encode())  # f"RESERVAR {cpf} {num_quarto} {periodo}"
-    #     resposta = self.cliente_socket.recv(1024).decode()
-    #     print("Resposta do servidor:", resposta)
-
     def enviar_requisicao(self, mensagem):
         mensagem += "\r\n" # Adiciona o terminador conforme exigido
         self.cliente_socket.send(mensagem.encode())  

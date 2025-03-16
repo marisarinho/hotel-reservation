@@ -32,7 +32,6 @@ class Hospede:
         digito2 = 0 if resto == 10 else resto
 
         if int(cpf[9]) != digito1 or int(cpf[10]) != digito2:
-            # print(f"Erro: CPF {cpf} com dígitos verificadores inválidos.") #testando
             return False
 
         return True
