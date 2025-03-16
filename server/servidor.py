@@ -63,14 +63,12 @@ class Servidor:
                 if comando[0] == "CADASTRAR" and len(comando) >= 4:
                     cpf, nome, telefone = comando[1], comando[2], comando[3]
                     print(f"Chamando add_hospede com CPF: {cpf}, Nome: {nome}, Telefone: {telefone}")
-
                     try:    
-                    
-                            resposta = self.gerenciador.add_hospede(cpf, nome, telefone)
-                            # Agora mostramos os hóspedes cadastrados corretamente
-                            mensagem = f"200 OK\nHóspede {nome} cadastrado com sucesso!\n{self.gerenciador.mostrar_hospede()}"
+                        self.gerenciador.add_hospede(cpf, nome, telefone)
+                        # Agora mostramos os hóspedes cadastrados corretamente
+                        mensagem = f"200 OK\nHóspede {nome} cadastrado com sucesso!\n{self.gerenciador.mostrar_hospede()}"
                     except Exception as e:
-                            mensagem = f"Erro- 500\nAo cadastrar hóspede: {str(e)}"
+                        mensagem = f"Erro- 500\nAo cadastrar hóspede: {str(e)}"
 
                 
                 elif comando[0] == "RESERVAR" and len(comando) >= 5:
@@ -79,7 +77,7 @@ class Servidor:
                         self.gerenciador.realizar_reserva(cpf, num_quarto, data_entrada, data_saida)
                         mensagem = f"200 OK\n Reserva confirmada para CPF {cpf}, Quarto {num_quarto}, de {data_entrada} a {data_saida}."
                     except ErroDeReserva as e:
-                        mensagem = f"ERRO- 409\n {str(e)}"
+                        mensagem = f"ERRO- 409\n {e.__str__()}"
 
                 elif comando[0] == "CANCELAR" and len(comando) >= 5:
                     cpf, num_quarto, data_entrada, data_saida = comando[1], int(comando[2]), comando[3], comando[4]
@@ -96,7 +94,7 @@ class Servidor:
 
                 elif comando[0] == "CONSULTAR" and len(comando) >= 3:
                     cpf = comando[1]
-                    ano = int(comando[2])  
+                    ano = comando[2]
                     usuario = self.gerenciador.buscar_usuario(cpf)
 
                     if not usuario:

@@ -13,13 +13,13 @@ class GerenciadorReservas:
 
     def __init__(self):
         # Se der erro foi aqui (especificando os tipos)
-        self.__hash_hospedes: HashTable[str, Hospede] = HashTable() # chave<cpf> : value <objeto Hospede>
-        self.__hash_quartos: HashTable[str, Quarto] = HashTable() # chave<numero_quarto> : value <objeto Quarto>
+        self.__hospedes: HashTable[str, Hospede] = HashTable() # chave<cpf> : value <objeto Hospede>
+        self.__quartos: HashTable[str, Quarto] = HashTable() # chave<numero_quarto> : value <objeto Quarto>
         #lista tb vai ficar privado provavelmtente
-        self.lista_reservas: Lista[Reserva] = Lista()  # Lista ordenada para armazenar as reservas. A chave da reserva é a data de entrada
-        gerar_quartos(self.__hash_quartos)  
+        self.__reservas: Lista[Reserva] = Lista()  # Lista ordenada para armazenar as reservas. A chave da reserva é a data de entrada
+        gerar_quartos(self.__quartos)
 
-    def realizar_reserva(self, cpf:str, num_quarto:int, data_entrada:datetime, data_saida:datetime):
+    def realizar_reserva(self, cpf:str, num_quarto:int, data_entrada: str, data_saida: str):
         '''
         Método que realiza a reserva de um quarto no período especificado.
 
@@ -27,7 +27,8 @@ class GerenciadorReservas:
         -----------
         cpf (str): o CPF do hóspede que está reservando o quarto
         num_quarto (int):
-        data_entrada (datetime): Data de inicio da reserva no formato aaaa-mm-dd
+        data_entrada (str): Data de inicio da reserva no formato dd/mm/aaaa
+        data_saida (str): Data de saida da reserva no formato dd/mm/aaaa
 
         Retorno
         ------------
@@ -39,25 +40,37 @@ class GerenciadorReservas:
         '''
         with lock:
             try:
-                hospede = self.__hash_hospedes[cpf]
-                data_entrada = datetime.strptime(data_entrada, "%Y-%m-%d")
-                data_saida = datetime.strptime(data_saida, "%Y-%m-%d")  
-                quarto = self.__hash_quartos[num_quarto]
+                hospede = self.__hospedes[cpf]
+            except KeyError:
+                raise ErroDeReserva(f'Hospede de cpf {cpf} não cadastrado')
+            
+            try:
+                data_entrada = datetime.strptime(data_entrada, "%d/%m/%Y")
+                data_saida = datetime.strptime(data_saida, "%d/%m/%Y")  
+            except ValueError:
+                raise ErroDeReserva("Formato inválido!")
+            
+            #MARK:realizar reserva 
+            """ 
+            Quando quarto nao é encontrado acaba caindo no 
+            mesmo erro de Hospede de cpf {cpf} não cadastrado
+            """
+            
+            try:
+                quarto = self.__quartos[num_quarto] 
             except KeyError: # aqui temos uma exceção se a chave cpf não estive na hash de hospede
-                raise ErroDeReserva(f' Hospede de cpf {cpf} não cadastrado')
-            except ValueError as ve:
-                raise ErroDeReserva(ve.__str__())
-
-        
+                raise ErroDeReserva(f'Quarto {num_quarto} não cadastrado')
+  
             nova_reserva = Reserva(quarto, data_entrada, data_saida, hospede)        
         
-            for reserva in self.lista_reservas:
-                if reserva.get_quarto() == nova_reserva.get_quarto():
-                    if not (data_saida <= reserva.get_data_entrada() or data_entrada >= reserva.get_data_saida()):
+            for reserva in self.__reservas:
+                reserva: Reserva
+                if reserva.quarto == nova_reserva.quarto:
+                    if not (data_saida < reserva.data_entrada or data_entrada > reserva.data_saida):
                         raise ErroDeReserva(
-                            f"O quarto {num_quarto} já está reservado de {reserva.get_data_entrada()} a {reserva.get_data_saida()}.")
-            self.lista_reservas.inserir(nova_reserva)
-            print(self.lista_reservas)
+                            f"O quarto {num_quarto} já está reservado de {reserva.data_entrada} a {reserva.data_saida}.")
+            self.__reservas.inserir(nova_reserva)
+            print(self.__reservas)
         
     def adicionar_quarto(self, num_quarto: int, preco: float, camas: int):
         """
@@ -74,11 +87,11 @@ class GerenciadorReservas:
         str: Mensagem confirmando a adição do quarto.
         """
         with lock:
-            if num_quarto in self.__hash_quartos:
-                raise ErroDeReserva(f" O quarto {num_quarto} já existe.") 
+            if num_quarto in self.__quartos:
+                raise ErroDeReserva(f"O quarto {num_quarto} já existe.") 
             
             novo_quarto = Quarto(num_quarto, preco, camas)
-            self.__hash_quartos[num_quarto] = novo_quarto
+            self.__quartos[num_quarto] = novo_quarto
             #return f"Quarto {num_quarto} adicionado com sucesso."
 
     # def mostrar_quartos(self):
@@ -87,12 +100,12 @@ class GerenciadorReservas:
     
     def mostrar_quartos(self):
         print("Quartos cadastrados:")
-        for chave, valor in self.__hash_quartos.items():  # Se for um dicionário
+        for chave, valor in self.__quartos.items():  # Se for um dicionário
             print(f"Quarto {chave}: {valor}")
 
     def mostrar_hospede(self):
         hospedes_lista = "Hospedes cadastrados:\n"
-        for chave, valor in self.__hash_hospedes.items():  # Se for um dicionário
+        for chave, valor in self.__hospedes.items():  # Se for um dicionário
             hospedes_lista += f"Hóspede {chave}: {valor}\n"
         return hospedes_lista
 
@@ -146,18 +159,14 @@ class GerenciadorReservas:
         '''
         
         try:
-            return self.__hash_hospedes[cpf]  
+            return self.__hospedes[cpf]  
         except KeyError:
             return None
         
-    def get_ano(self):
-        # Extraindo o ano da data no formato 'DD/MM/YYYY'
-        return self.__data_entrada.split("/")[0]
-    
-    def consultar_reservas(self, ano: int, cpf: str) -> List[Reserva]:
+    def consultar_reserva(self, cpf: str, ano: str) -> List[Reserva]:
         '''
         Método que consulta todas as reservas associadas a um determinado CPF em um ano específico.
-
+ 
         Parâmetros
         -----------
         cpf (str): O CPF do hóspede cujas reservas serão consultadas.
@@ -176,34 +185,12 @@ class GerenciadorReservas:
         # Filtra as reservas pelo ano e CPF
         reservas_filtradas = [
             reserva for reserva in self.__reservas 
-            if reserva.get_ano() == ano and reserva.cpf == cpf
+            if reserva.ano == ano and reserva.hospede.cpf == cpf
         ]
         return reservas_filtradas
 
 
-    def validar_cpf(self, cpf: str):
-        cpf = ''.join(filter(str.isdigit, cpf))
-
-        if len(cpf) != 11:
-            raise ErroDeReserva("CPF inválido! Deve conter exatamente 11 dígitos numéricos.")
-        if cpf == cpf[0] * 11:
-            raise ErroDeReserva("CPF inválido! Não pode conter todos os dígitos iguais.")
-
-        soma = sum(int(cpf[i]) * (10 - i) for i in range(9))
-        resto = (soma * 10) % 11
-        digito1 = 0 if resto == 10 else resto
-
-        soma = sum(int(cpf[i]) * (11 - i) for i in range(10))
-        resto = (soma * 10) % 11
-        digito2 = 0 if resto == 10 else resto
-
-        if int(cpf[9]) != digito1 or int(cpf[10]) != digito2:
-            # print(f"Erro: CPF {cpf} com dígitos verificadores inválidos.") #testando
-            raise ErroDeReserva("CPF inválido! Dígitos verificadores não conferem.")
-
-        return True
-    
-    def add_hospede(self, cpf: str, nome: str, telefone: str):
+    def add_hospede(self, cpf: str, nome: str, telefone: str) -> None:
         """
         Método para adicionar um hóspede ao sistema.
 
@@ -215,21 +202,15 @@ class GerenciadorReservas:
 
         Retorno:
         ------------
-        str: Mensagem confirmando o cadastro do hóspede.
+        None
         """
 
-        try:
-            # Validações
-            #uma ou duas underlines?
-            #self.__validar_cpf(cpf)5
-            self.validar_cpf(cpf)
-            # Verifica se o CPF já está cadastrado
-            if cpf in self.__hash_hospedes:
-                raise ErroDeReserva("Hóspede já cadastrado.")
-            novo_hospede = Hospede(nome, cpf, telefone)
-            self.__hash_hospedes[cpf] = novo_hospede
-
-
-        except ErroDeReserva as e:
-            return str(e) 
+        if cpf in self.__hospedes:
+            print("Hóspede já cadastrado.")
+            raise ErroDeReserva("Hóspede já cadastrado.")
+        
+        novo_hospede = Hospede(nome, cpf, telefone)
+        self.__hospedes[cpf] = novo_hospede
+        print(f"Hospede {nome}, cpf: {cpf}, cadastrado com sucesso!")
+        print("<hashtable>: ", self.__hospedes)
     
