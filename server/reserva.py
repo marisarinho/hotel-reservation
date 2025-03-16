@@ -35,7 +35,7 @@ class Reserva:
     
     @property
     def ano(self):
-        return str(self.__data_entrada.year)
+        return self.__data_entrada.year
     
     @property
     def quarto(self):

@@ -4,6 +4,16 @@ import sys
 from gerenciamento import GerenciadorReservas
 from exception import ErroDeReserva
 
+class Cliente:
+    def __init__(self, socket: socket, address: tuple[str, int], nome="", cpf=""):
+        self.socket = socket
+        self.address = address
+        self.nome = nome
+        self.cpf = cpf
+
+    def __eq__(self, other: "Cliente") -> bool:
+        return self.cpf == other.cpf
+
 
 class Servidor:
 
@@ -12,7 +22,7 @@ class Servidor:
         self.porta = porta
         self.gerenciador = GerenciadorReservas()
         self.servidor_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.clients = []
+        self.clients: list[Cliente] = []
     
     def start(self):
         self.servidor_socket.bind((self.host, self.porta))
@@ -23,8 +33,9 @@ class Servidor:
             try:
                 conexao, endereco = self.servidor_socket.accept()
                 print(f"Cliente conectado: {endereco}")
-                self.clients.append(conexao)
-                thread_cliente = threading.Thread(target=self.lidar_com_cliente, args=(conexao,))
+                cliente = Cliente(conexao, endereco)
+                self.clients.append(cliente)
+                thread_cliente = threading.Thread(target=self.lidar_com_cliente, args=(cliente,))
                 thread_cliente.start()
             except (OSError, KeyboardInterrupt):
                 break
@@ -43,13 +54,13 @@ class Servidor:
                 break
 
         for client in self.clients:
-            client.close()
+            client.socket.close()
         self.servidor_socket.close()
 
-    def lidar_com_cliente(self, conexao):
+    def lidar_com_cliente(self, cliente: Cliente):
         while True:
             try:
-                dados = conexao.recv(1024).decode().strip("\r\n")
+                dados = cliente.socket.recv(1024).decode().strip("\r\n")
             except ConnectionAbortedError:
                 break
         
@@ -61,67 +72,86 @@ class Servidor:
                 mensagem = "Comando inválido."
                 
                 if comando[0] == "CADASTRAR" and len(comando) >= 4:
-                    cpf, nome, telefone = comando[1], comando[2], comando[3]
+                    # cpf, nome, telefone = comando[1], comando[2], comando[3]
+                    _, cpf, nome, telefone = comando
                     print(f"Chamando add_hospede com CPF: {cpf}, Nome: {nome}, Telefone: {telefone}")
                     try:    
+                        if cliente.cpf != "" and cliente.nome != "":
+                            raise ErroDeReserva("Hóspede (você) já cadastrado.")
+                        
                         self.gerenciador.add_hospede(cpf, nome, telefone)
                         # Agora mostramos os hóspedes cadastrados corretamente
+                        cliente.cpf = cpf
+                        cliente.nome = nome
                         mensagem = f"200 OK\nHóspede {nome} cadastrado com sucesso!\n{self.gerenciador.mostrar_hospede()}"
                     except Exception as e:
                         mensagem = f"Erro- 500\nAo cadastrar hóspede: {str(e)}"
 
                 
-                elif comando[0] == "RESERVAR" and len(comando) >= 5:
-                    cpf, num_quarto, data_entrada, data_saida = comando[1], int(comando[2]), comando[3], comando[4]
+                elif comando[0] == "RESERVAR" and len(comando) >= 4:
+                    # cpf, num_quarto, data_entrada, data_saida = comando[1], int(comando[2]), comando[3], comando[4]
+                    _, num_quarto, data_entrada, data_saida = comando
+                    num_quarto = int(num_quarto)
                     try:
-                        self.gerenciador.realizar_reserva(cpf, num_quarto, data_entrada, data_saida)
-                        mensagem = f"200 OK\n Reserva confirmada para CPF {cpf}, Quarto {num_quarto}, de {data_entrada} a {data_saida}."
+                        # if cpf != cliente.cpf:
+                        #     raise ErroDeReserva("(Não autorizado) CPF é de outro hóspede.")
+                        
+                        self.gerenciador.realizar_reserva(cliente.cpf, num_quarto, data_entrada, data_saida)
+                        mensagem = f"200 OK\n Reserva confirmada para CPF {cliente.cpf}, Quarto {num_quarto}, de {data_entrada} a {data_saida}."
                     except ErroDeReserva as e:
                         mensagem = f"ERRO- 409\n {e.__str__()}"
 
-                elif comando[0] == "CANCELAR" and len(comando) >= 5:
-                    cpf, num_quarto, data_entrada, data_saida = comando[1], int(comando[2]), comando[3], comando[4]
+                elif comando[0] == "CANCELAR" and len(comando) >= 3:
+                    # cpf, num_quarto, data_entrada = comando[1], int(comando[2]), comando[3]
+                    _, num_quarto, data_entrada = comando
+                    num_quarto = int(num_quarto) # declarando pra nao dar indefinido
                     try:
-                        self.gerenciador.cancelar_reserva(cpf, num_quarto, data_entrada, data_saida)
-                        mensagem = f"200 OK\n Reserva do Quarto {num_quarto} para CPF {cpf} cancelada."
+                        # if cpf != cliente.cpf:
+                        #     raise ErroDeReserva("(Não autorizado) CPF é de outro hóspede.")
+                        self.gerenciador.cancelar_reserva(cliente.cpf, num_quarto, data_entrada)
+                        mensagem = f"200 OK\n Reserva do Quarto {num_quarto} para CPF {cliente.cpf} cancelada."
                     except ErroDeReserva as e:
                         mensagem = f"ERRO- 404\n Reserva não encontrada: {str(e)}"
             
                 elif comando[0] == "ADICIONAR" and len(comando)>=4:
-                    num_quarto,preco,cama = int(comando[1]),comando[2],comando[3]
+                    _, num_quarto, preco, cama = comando
+                    num_quarto = int(num_quarto)
                     self.gerenciador.adicionar_quarto(num_quarto,preco,cama)
                     mensagem = f'({self.gerenciador.mostrar_quartos()}'
 
-                elif comando[0] == "CONSULTAR" and len(comando) >= 3:
-                    cpf = comando[1]
-                    ano = comando[2]
-                    usuario = self.gerenciador.buscar_usuario(cpf)
+                elif comando[0] == "CONSULTAR" and len(comando) >= 2:
+                    # cpf = comando[1]
+                    ano = int(comando[1])
+                    usuario = self.gerenciador.buscar_usuario(cliente.cpf)
+                    
+                    try:
+                        if not usuario:
+                            raise ErroDeReserva("Hóspede não encontrado.")
+                        
+                        # if cpf != cliente.cpf:
+                        #     raise ErroDeReserva("(Não autorizado) CPF é de outro hóspede.")
+                        
+                        reservas = self.gerenciador.consultar_reserva(cliente.cpf, ano)
+                        if not reservas:
+                            raise ErroDeReserva(f"Usuário {usuario.nome} (CPF: {cliente.cpf}) está cadastrado, mas não possui reservas.")
+                        
+                        mensagem = f"200 OK\n Reservas para {usuario.nome} (CPF: {cliente.cpf}):\n"
+                        for reserva in reservas:
+                            mensagem += f"- Quarto {reserva.quarto.num_quarto}, Entrada: {reserva.data_entrada}, Saída: {reserva.data_saida}\n"
 
-                    if not usuario:
-                        mensagem = "ERRO- 404\n Nenhum usuário encontrado com este CPF."
-                    else:
-                        try:
-                            reservas = self.gerenciador.consultar_reserva(cpf, ano)
-                            if not reservas:
-                                raise ErroDeReserva(f"Usuário {usuario.nome} (CPF: {cpf}) está cadastrado, mas não possui reservas.")
-                            
-                            mensagem = f"200 OK\n Reservas para {usuario.nome} (CPF: {cpf}):\n"
-                            for reserva in reservas:
-                                mensagem += f"- Quarto {reserva.quarto.get_num_quarto()}, Entrada: {reserva.data_entrada}, Saída: {reserva.data_saida}\n"
-
-                        except ErroDeReserva as e:
-                            mensagem = f"ERRO- 404\n {str(e)}"
+                    except ErroDeReserva as e:
+                        mensagem = f"ERRO- 404\n {str(e)}"
 
                 elif comando[0] == "SAIR":
                     mensagem = "🔌 Conexão encerrada pelo cliente."
-                    conexao.send(mensagem.encode())
-                    conexao.close()
+                    cliente.socket.send(mensagem.encode())
+                    cliente.socket.close()
                     return
 
-                conexao.send(mensagem.encode())
+                cliente.socket.send(mensagem.encode())
         
             except Exception as e:
-                conexao.send(f"500| Erro interno: {str(e)}".encode())
+                cliente.socket.send(f"500| Erro interno: {str(e)}".encode())
 
 if __name__ == "__main__":
     if len(sys.argv)>1:
