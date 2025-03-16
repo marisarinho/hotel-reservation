@@ -172,7 +172,7 @@ class GerenciadorReservas:
         return reservas_filtradas
 
 
-    def add_hospede(self, cpf: str, nome: str, telefone: str) -> None:
+    def add_hospede(self, cpf: str, nome: str, telefone: str, senha: str) -> None:
         """
         Método para adicionar um hóspede ao sistema.
 
@@ -188,9 +188,9 @@ class GerenciadorReservas:
         """
 
         if self.buscar_usuario(cpf) is not None:
-            raise ErroDeReserva("Hóspede já cadastrado.")
+            raise ErroDeReserva("Hóspede com o mesmo CPF já cadastrado.")
         
-        novo_hospede = Hospede(nome, cpf, telefone)
+        novo_hospede = Hospede(nome, cpf, telefone, senha)
         self.__hospedes[cpf] = novo_hospede
         print(f"Hospede {nome}, cpf: {cpf}, cadastrado com sucesso!")
     

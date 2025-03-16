@@ -23,45 +23,52 @@ class Cliente:
         while True:
             print("\n--- Sistema de Reservas ---")
             print("1. Cadastrar")
-            print("2. Fazer reserva")
-            print("3. Cancelar reserva")
-            print("4. Consultar reserva por ano")
-            print("5. Sair")
+            print("2. Fazer login")
+            print("3. Fazer reserva")
+            print("4. Cancelar reserva")
+            print("5. Consultar reserva por ano")
+            print("6. Sair")
 
             opcao = input("Escolha uma opção: ")
 
             if opcao == "1":
-                cpf = input("Digite seu CPF: ")
-                nome = input("Digite seu nome: ")
-                telefone = input("Digite seu telefone: ")
-                self.enviar_requisicao(f"CADASTRAR {cpf} {nome} {telefone}")
+                cpf = input("Digite seu CPF: ").strip()
+                nome = input("Digite seu nome: ").strip()
+                telefone = input("Digite seu telefone: ").strip()
+                senha = input("Digite a senha: ").strip()
+                self.enviar_requisicao(f"CADASTRAR {cpf} {nome} {telefone} {senha}")
             
             elif opcao == "2":
+                cpf = input("Digite seu CPF: ").strip()
+                senha = input("Digite a senha: ").strip()
+                self.enviar_requisicao(f"LOGIN {cpf} {senha}")
+            
+            elif opcao == "3":
                 """ 
                 Fazer verificaçoes no cliente (nao exclui as do servidor)
                 """
                 # cpf = input("Digite seu CPF: ")
-                data_entrada = input("Data de entrada (ex: 15/03/2025):")
-                data_saida = input("Data de saída (ex: 16/03/2025):")
-                num_quarto = input("Número do quarto: ")
+                data_entrada = input("Data de entrada (ex: 15/03/2025): ").strip()
+                data_saida = input("Data de saída (ex: 16/03/2025): ").strip()
+                num_quarto = input("Número do quarto: ").strip()
                 # self.enviar_requisicao(f"RESERVAR {cpf} {num_quarto} {data_entrada} {data_saida}")
                 self.enviar_requisicao(f"RESERVAR {num_quarto} {data_entrada} {data_saida}")
 
-            elif opcao == "3":
+            elif opcao == "4":
                 # cpf = input("Digite seu CPF: ")
-                data_entrada = input("Data de entrada (ex: 15/03/2025):")
-                num_quarto = input("Número do quarto para cancelar: ")
+                data_entrada = input("Data de entrada (ex: 15/03/2025): ").strip()
+                num_quarto = input("Número do quarto para cancelar: ").strip()
                 # self.enviar_requisicao(f"CANCELAR {cpf} {num_quarto} {data_entrada}")
                 self.enviar_requisicao(f"CANCELAR {num_quarto} {data_entrada}")
 
-            elif opcao == "4":
+            elif opcao == "5":
                 # cpf = input("Digite seu CPF: ")
-                ano = input("Digite o ano da reserva: ")
+                ano = input("Digite o ano da reserva: ").strip()
                 self.enviar_requisicao(f"CONSULTAR {ano}")
                 # self.enviar_requisicao(f"CONSULTAR {cpf} {ano}")
 
                 
-            elif opcao == "5":
+            elif opcao == "6":
                 print("Encerrando conexão...")
                 self.fechar_conexao()
                 break

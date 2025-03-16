@@ -14,6 +14,8 @@ class Cliente:
     def __eq__(self, other: "Cliente") -> bool:
         return self.cpf == other.cpf
 
+    def esta_logado(self):
+        return self.nome != "" and self.cpf != ""
 
 class Servidor:
 
@@ -71,30 +73,48 @@ class Servidor:
                 comando = dados.split()
                 mensagem = "Comando inválido."
                 
-                if comando[0] == "CADASTRAR" and len(comando) >= 4:
+                if comando[0] == "CADASTRAR" and len(comando) >= 5:
                     # cpf, nome, telefone = comando[1], comando[2], comando[3]
-                    _, cpf, nome, telefone = comando
-                    print(f"Chamando add_hospede com CPF: {cpf}, Nome: {nome}, Telefone: {telefone}")
+                    _, cpf, nome, telefone, senha = comando
+                    # print(f"Chamando add_hospede com CPF: {cpf}, Nome: {nome}, Telefone: {telefone}")
                     try:    
-                        if cliente.cpf != "" and cliente.nome != "":
-                            raise ErroDeReserva("Hóspede (você) já cadastrado.")
+                        if cliente.esta_logado():
+                            raise ErroDeReserva("Você já está cadastrado.")
                         
-                        self.gerenciador.add_hospede(cpf, nome, telefone)
+                        self.gerenciador.add_hospede(cpf, nome, telefone, senha)
                         # Agora mostramos os hóspedes cadastrados corretamente
                         cliente.cpf = cpf
                         cliente.nome = nome
-                        mensagem = f"200 OK\nHóspede {nome} cadastrado com sucesso!\n{self.gerenciador.mostrar_hospede()}"
+                        mensagem = f"200 OK\nHóspede {cliente.nome} cadastrado com sucesso!\n{self.gerenciador.mostrar_hospede()}"
                     except Exception as e:
                         mensagem = f"Erro- 500\nAo cadastrar hóspede: {str(e)}"
 
+
+                elif comando[0] == "LOGIN" and len(comando) >= 3:
+                    print("entrou no login")
+                    _, cpf, senha = comando
+                    hospede = self.gerenciador.buscar_usuario(cpf)
+                    try:
+                        if cliente.esta_logado():
+                            raise ErroDeReserva("Você já está logado.")
+                        
+                        if not hospede or hospede.senha != senha:
+                            raise ErroDeReserva("CPF ou senha errados.")
+
+                        cliente.nome = hospede.nome
+                        cliente.cpf = cpf
+                        mensagem = f"200 OK\nHóspede {cliente.nome} logado com sucesso!"         
+                    except Exception as e:
+                        mensagem = f"Erro- 500\nAo fazer login: {str(e)}"
+                    
                 
                 elif comando[0] == "RESERVAR" and len(comando) >= 4:
                     # cpf, num_quarto, data_entrada, data_saida = comando[1], int(comando[2]), comando[3], comando[4]
                     _, num_quarto, data_entrada, data_saida = comando
                     num_quarto = int(num_quarto)
                     try:
-                        # if cpf != cliente.cpf:
-                        #     raise ErroDeReserva("(Não autorizado) CPF é de outro hóspede.")
+                        if not cliente.esta_logado():
+                            raise ErroDeReserva("É necessário fazer login.")
                         
                         self.gerenciador.realizar_reserva(cliente.cpf, num_quarto, data_entrada, data_saida)
                         mensagem = f"200 OK\n Reserva confirmada para CPF {cliente.cpf}, Quarto {num_quarto}, de {data_entrada} a {data_saida}."
@@ -106,8 +126,9 @@ class Servidor:
                     _, num_quarto, data_entrada = comando
                     num_quarto = int(num_quarto) # declarando pra nao dar indefinido
                     try:
-                        # if cpf != cliente.cpf:
-                        #     raise ErroDeReserva("(Não autorizado) CPF é de outro hóspede.")
+                        if not cliente.esta_logado():
+                            raise ErroDeReserva("É necessário fazer login.")
+                        
                         self.gerenciador.cancelar_reserva(cliente.cpf, num_quarto, data_entrada)
                         mensagem = f"200 OK\n Reserva do Quarto {num_quarto} para CPF {cliente.cpf} cancelada."
                     except ErroDeReserva as e:
@@ -125,11 +146,11 @@ class Servidor:
                     usuario = self.gerenciador.buscar_usuario(cliente.cpf)
                     
                     try:
+                        if not cliente.esta_logado():
+                            raise ErroDeReserva("É necessário fazer login.")
+                        
                         if not usuario:
                             raise ErroDeReserva("Hóspede não encontrado.")
-                        
-                        # if cpf != cliente.cpf:
-                        #     raise ErroDeReserva("(Não autorizado) CPF é de outro hóspede.")
                         
                         reservas = self.gerenciador.consultar_reserva(cliente.cpf, ano)
                         if not reservas:
@@ -146,6 +167,7 @@ class Servidor:
                     mensagem = "🔌 Conexão encerrada pelo cliente."
                     cliente.socket.send(mensagem.encode())
                     cliente.socket.close()
+                    self.clients.remove(cliente)
                     return
 
                 cliente.socket.send(mensagem.encode())

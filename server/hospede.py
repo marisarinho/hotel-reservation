@@ -1,14 +1,15 @@
 from exception import ErroDeReserva
 
 class Hospede:
-    def __init__(self, nome:str, cpf:str, telefone:int):
+    def __init__(self, nome:str, cpf:str, telefone:int, senha:str):
         self.nome = nome
 
-        # if not self.__cpf_valido(cpf):
-        #     raise ErroDeReserva('CPF inválido')
+        if not self.__cpf_valido(cpf):
+            raise ErroDeReserva('CPF inválido')
             
         self.cpf = cpf
         self.telefone = telefone
+        self.senha = senha
 
     def __str__(self):
         return f"{self.nome} {self.cpf} {self.telefone}"
