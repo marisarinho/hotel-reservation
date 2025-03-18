@@ -117,10 +117,10 @@ class Servidor:
                         if cliente.esta_logado():
                             raise ErroDeReserva("Você já está logado.")
                         
-                        if not hospede or hospede.__senha != senha:
+                        if not hospede or hospede.senha != senha:
                             raise ErroDeReserva("CPF ou senha errados.")
 
-                        cliente.nome = hospede.__nome
+                        cliente.nome = hospede.nome
                         cliente.cpf = cpf
                         mensagem = f"200 OK\nHóspede {cliente.nome} logado com sucesso!"         
                     except Exception as e:
@@ -173,9 +173,9 @@ class Servidor:
                         
                         reservas = self.gerenciador.consultar_reserva(cliente.cpf, ano)
                         if not reservas:
-                            raise ErroDeReserva(f"Usuário {usuario.__nome} (CPF: {cliente.cpf}) está cadastrado, mas não possui reservas.")
+                            raise ErroDeReserva(f"Usuário {usuario.nome} (CPF: {cliente.cpf}) está cadastrado, mas não possui reservas.")
                         
-                        mensagem = f"200 OK\n Reservas para {usuario.__nome} (CPF: {cliente.cpf}):\n"
+                        mensagem = f"200 OK\n Reservas para {usuario.nome} (CPF: {cliente.cpf}):\n"
                         for reserva in reservas:
                             mensagem += f"- Quarto {reserva.quarto.num_quarto}, Entrada: {reserva.data_entrada}, Saída: {reserva.data_saida}\n"
 
