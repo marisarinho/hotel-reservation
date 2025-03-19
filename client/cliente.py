@@ -27,7 +27,9 @@ class Cliente:
             print("3. Fazer reserva")
             print("4. Cancelar reserva")
             print("5. Consultar reserva por ano")
-            print("6. Sair")
+            print("6. Listar quartos")
+            print("7. Adicionar quarto")
+            print("8. Sair")
 
             opcao = input("Escolha uma opção: ")
 
@@ -66,9 +68,16 @@ class Cliente:
                 ano = input("Digite o ano da reserva: ").strip()
                 self.enviar_requisicao(f"CONSULTAR {ano}")
                 # self.enviar_requisicao(f"CONSULTAR {cpf} {ano}")
-
-                
             elif opcao == "6":
+                self.enviar_requisicao(f'LISTAR')
+
+            elif opcao == "7":
+                num_quarto = input('Qual o numero do quarto que dejesa adicionar: ')
+                preco = input('Valor do quarto: ') 
+                cama =  input('Quantidade de camas: ')
+                self.enviar_requisicao(f'ADICIONAR {num_quarto} {preco} {cama}')
+
+            elif opcao == "8":
                 print("Encerrando conexão...")
                 self.fechar_conexao()
                 break

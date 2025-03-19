@@ -104,9 +104,13 @@ class Servidor:
                         # Agora mostramos os hóspedes cadastrados corretamente
                         cliente.cpf = cpf
                         cliente.nome = nome
-                        mensagem = f"200 OK\nHóspede {cliente.nome} cadastrado com sucesso!\n{self.gerenciador.mostrar_hospede()}"
+                        mensagem_real = f"200 OK\nHóspede {cliente.nome} logado com sucesso!"
+                        print(mensagem_real)
+                        mensagem = f"Hóspede {cliente.nome} cadastrado com sucesso!\n{self.gerenciador.mostrar_hospede()}"
                     except Exception as e:
-                        mensagem = f"Erro- 500\nAo cadastrar hóspede: {str(e)}"
+                        mensagem_real = f"Erro- 500\nAo cadastrar hóspede: {str(e)}"
+                        print(mensagem_real)
+                        mensagem = str(e.args[0])
 
 
                 elif comando[0] == "LOGIN" and len(comando) >= 3:
@@ -122,9 +126,13 @@ class Servidor:
 
                         cliente.nome = hospede.nome
                         cliente.cpf = cpf
-                        mensagem = f"200 OK\nHóspede {cliente.nome} logado com sucesso!"         
+                        mensagem_real = f"200 OK\nHóspede {cliente.nome} logado com sucesso!"
+                        print(mensagem_real)
+                        mensagem = f"Hóspede {cliente.nome} logado com sucesso!"         
                     except Exception as e:
-                        mensagem = f"Erro- 500\nAo fazer login: {str(e)}"
+                        mensagem_real = f"Erro- 500\nAo fazer login: {str(e)}"
+                        print(mensagem_real)
+                        mensagem = str(e.args[0])
                     
                 
                 elif comando[0] == "RESERVAR" and len(comando) >= 4:
@@ -136,9 +144,14 @@ class Servidor:
                             raise ErroDeReserva("É necessário fazer login.")
                         
                         self.gerenciador.realizar_reserva(cliente.cpf, num_quarto, data_entrada, data_saida)
-                        mensagem = f"200 OK\n Reserva confirmada para CPF {cliente.cpf}, Quarto {num_quarto}, de {data_entrada} a {data_saida}."
+                        mensagem_real = f"200 OK\n Reserva confirmada para CPF {cliente.cpf}, Quarto {num_quarto}, de {data_entrada} a {data_saida}."
+                        print(mensagem_real)
+                        mensagem = f"Reserva confirmada para CPF {cliente.cpf}, Quarto {num_quarto}, de {data_entrada} a {data_saida}."
                     except ErroDeReserva as e:
-                        mensagem = f"ERRO- 409\n {e.__str__()}"
+                        mensagem_real = f"ERRO- 409\n Erro ao reservar quaro"
+                        print(mensagem_real)
+                        
+                        mensagem = str(e.args[0])
 
                 elif comando[0] == "CANCELAR" and len(comando) >= 3:
                     # cpf, num_quarto, data_entrada = comando[1], int(comando[2]), comando[3]
@@ -149,15 +162,23 @@ class Servidor:
                             raise ErroDeReserva("É necessário fazer login.")
                         
                         self.gerenciador.cancelar_reserva(cliente.cpf, num_quarto, data_entrada)
-                        mensagem = f"200 OK\n Reserva do Quarto {num_quarto} para CPF {cliente.cpf} cancelada."
+                        mensagem_real = f"200 OK\n Reserva realizada"
+                        print(mensagem_real)
+                        mensagem = f"Reserva do Quarto {num_quarto} para CPF {cliente.cpf} cancelada."
                     except ErroDeReserva as e:
-                        mensagem = f"ERRO- 404\n Reserva não encontrada: {str(e)}"
+                        mensagem_real = f"ERRO- 404\n Reserva confirmada para CPF {cliente.cpf}, Quarto {num_quarto}, de {data_entrada} a {data_saida}."
+                        print(mensagem_real)
+                        mensagem = str(e.args[0])
             
                 elif comando[0] == "ADICIONAR" and len(comando)>=4:
                     _, num_quarto, preco, cama = comando
                     num_quarto = int(num_quarto)
                     self.gerenciador.adicionar_quarto(num_quarto,preco,cama)
                     mensagem = f'({self.gerenciador.mostrar_quartos()}'
+
+                
+                elif comando[0] == "LISTAR" and len(comando) >= 1:
+                    mensagem = self.gerenciador.mostrar_quartos()
 
                 elif comando[0] == "CONSULTAR" and len(comando) >= 2:
                     # cpf = comando[1]
@@ -175,12 +196,16 @@ class Servidor:
                         if not reservas:
                             raise ErroDeReserva(f"Usuário {usuario.nome} (CPF: {cliente.cpf}) está cadastrado, mas não possui reservas.")
                         
-                        mensagem = f"200 OK\n Reservas para {usuario.nome} (CPF: {cliente.cpf}):\n"
+                        mensagem_real = f"200 OK\n Reserva encontrada"
+                        print(mensagem_real)
+                        mensagem = f"Reservas para {usuario.nome} (CPF: {cliente.cpf}):\n"
                         for reserva in reservas:
                             mensagem += f"- Quarto {reserva.quarto.num_quarto}, Entrada: {reserva.data_entrada}, Saída: {reserva.data_saida}\n"
 
                     except ErroDeReserva as e:
-                        mensagem = f"ERRO- 404\n {str(e)}"
+                        mensagem_real = f"ERRO- 404\n erro ao realizar cancelamento"
+                        print(mensagem_real)
+                        mensagem = str(e.args[0])
 
                 elif comando[0] == "SAIR":
                     mensagem = "🔌 Conexão encerrada pelo cliente."

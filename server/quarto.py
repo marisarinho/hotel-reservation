@@ -7,6 +7,9 @@ class Quarto:
     def __eq__(self, other):
         return self.__num_quarto == other.__num_quarto
     
+    def __str__(self):
+        return f"Nº {self.num_quarto}, Preço: R${self.preco}, Cama: {self.camas}"
+    
     @property
     def num_quarto(self):
         return self.__num_quarto

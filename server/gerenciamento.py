@@ -88,9 +88,11 @@ class GerenciadorReservas:
             self.__quartos[num_quarto] = novo_quarto
 
     def mostrar_quartos(self):
-        print("Quartos cadastrados:")
-        for chave, valor in self.__quartos.items():  # Se for um dicionário
-            print(f"Quarto {chave}: {valor}")
+        mensagem = "Quartos cadastrados:\n"
+        for chave, valor in self.__quartos.items():
+            mensagem += f"Quarto {chave}: Nº {valor.num_quarto}, Preço: R${valor.preco}, Cama: {valor.camas}\n"
+        return mensagem
+
 
     def mostrar_hospede(self):
         hospedes_lista = "Hospedes cadastrados:\n"
