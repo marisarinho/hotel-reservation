@@ -42,6 +42,31 @@ hrcp/<br>
 ├── hrcp.md<br>
 └── README.md <br>
 
+## Pré-Requisitos para Execução 
+Python: Versão 3.11 <br>
+Numpy: (pip install numpy)<br>
+
+
+## Protocolo da Aplicação:
+[Acesse aqui.](ttps://github.com/marisarinho/hotel-reservation/blob/main/hrcp.md)<br>
+
+## Instruções para Execução
+**Clone o repositório:**
+git clone https://github.com/marisarinho/hotel-reservation.git <br>
+
+**Entre no diretório do projeto:**
+cd hotel-reservation<br>
+
+**Instale o Numpy caso não esteja instalado:**
+pip install numpy<br>
+
+## Rode o servidor:
+cd server<br>
+python servidor.py<br>
+
+## Em outro terminal, rode n clientes:
+cd client<br>
+python cliente.py
 
 ## Desenvolvedoras responsaveis pelo projeto
 
