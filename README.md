@@ -60,13 +60,13 @@ cd hotel-reservation<br>
 **Instale o Numpy caso não esteja instalado:**
 pip install numpy<br>
 
-## Rode o servidor:
+**Rode o servidor:**
 cd server<br>
 python servidor.py<br>
 
-## Em outro terminal, rode n clientes:
+**Em outro terminal, rode n clientes:**
 cd client<br>
-python cliente.py
+python cliente.py<br>
 
 ## Desenvolvedoras responsaveis pelo projeto
 
