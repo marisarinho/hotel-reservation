@@ -1,5 +1,6 @@
 import socket
 import sys
+from funcaoaleatoria import listaquarto
 
 class Cliente:
     def __init__(self, host='127.0.0.1', porta=12345):
@@ -27,6 +28,8 @@ class Cliente:
                 print("Reserva realizada", msg.strip())
             elif codigo == 201:
                 print("", msg.strip())
+            elif codigo == 202:
+                listaquarto(msg.strip())
             elif codigo == 400:
                 print("Reserva não encontrada", msg.strip())
             elif codigo == 401:
