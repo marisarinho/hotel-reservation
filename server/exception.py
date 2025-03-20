@@ -5,6 +5,6 @@ class ErroDeReserva(Exception):
         self.mensagem = mensagem
 
     def __str__(self):
-        return f"ErroDeReserva: {self.mensagem}"
+        return f"{self.mensagem}"
 
 

@@ -10,14 +10,35 @@ class Cliente:
         self.cliente_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.cliente_socket.connect((self.host, self.porta))
 
-    def enviar_requisicao(self, mensagem):
-        mensagem += "\r\n" # Adiciona o terminador conforme exigido
-        self.cliente_socket.send(mensagem.encode())  
-        resposta = self.cliente_socket.recv(1024).decode()
-        print("📩 Resposta do servidor:", resposta)
+
 
     def fechar_conexao(self):
         self.cliente_socket.close()
+
+    def enviar_requisicao(self, mensagem): #RESERVAR {num_quarto} {data_entrada} {data_saida}
+        mensagem += "\r\n"
+        self.cliente_socket.send(mensagem.encode())  
+        resposta = self.cliente_socket.recv(1024).decode()
+        
+        codigo, _, msg = resposta.partition("|")
+        if codigo.isdigit():
+            codigo = int(codigo)
+            if codigo == 200:
+                print("Reserva realizada", msg.strip())
+            elif codigo == 201:
+                print("", msg.strip())
+            elif codigo == 400:
+                print("Reserva não encontrada", msg.strip())
+            elif codigo == 401:
+                print("Acesso negado:", msg.strip())
+            elif codigo == 409:
+                print("Opção não é válida", msg.strip())
+            elif codigo == 500:
+                print("Erro interno do servidor:", msg.strip())
+            else:
+                print("Código desconhecido:", msg.strip())
+        else:
+            print("Resposta do servidor:", resposta)
 
     def menu(self):
         while True:
@@ -38,35 +59,31 @@ class Cliente:
                 nome = input("Digite seu nome: ").strip()
                 telefone = input("Digite seu telefone: ").strip()
                 senha = input("Digite a senha: ").strip()
-                self.enviar_requisicao(f"CADASTRAR {cpf} {nome} {telefone} {senha}")
+                self.enviar_requisicao(f"CADASTRAR|{cpf}|{nome}|{telefone}|{senha}")
             
             elif opcao == "2":
                 cpf = input("Digite seu CPF: ").strip()
                 senha = input("Digite a senha: ").strip()
-                self.enviar_requisicao(f"LOGIN {cpf} {senha}")
+                self.enviar_requisicao(f"LOGIN|{cpf}|{senha}")
             
             elif opcao == "3":
                 """ 
                 Fazer verificaçoes no cliente (nao exclui as do servidor)
                 """
-                # cpf = input("Digite seu CPF: ")
                 data_entrada = input("Data de entrada (ex: 15/03/2025): ").strip()
                 data_saida = input("Data de saída (ex: 16/03/2025): ").strip()
                 num_quarto = input("Número do quarto: ").strip()
-                # self.enviar_requisicao(f"RESERVAR {cpf} {num_quarto} {data_entrada} {data_saida}")
-                self.enviar_requisicao(f"RESERVAR {num_quarto} {data_entrada} {data_saida}")
+                self.enviar_requisicao(f"RESERVAR|{num_quarto}|{data_entrada}|{data_saida}")
 
             elif opcao == "4":
-                # cpf = input("Digite seu CPF: ")
                 data_entrada = input("Data de entrada (ex: 15/03/2025): ").strip()
                 num_quarto = input("Número do quarto para cancelar: ").strip()
-                # self.enviar_requisicao(f"CANCELAR {cpf} {num_quarto} {data_entrada}")
-                self.enviar_requisicao(f"CANCELAR {num_quarto} {data_entrada}")
+                self.enviar_requisicao(f"CANCELAR|{num_quarto}|{data_entrada}")
 
             elif opcao == "5":
                 # cpf = input("Digite seu CPF: ")
                 ano = input("Digite o ano da reserva: ").strip()
-                self.enviar_requisicao(f"CONSULTAR {ano}")
+                self.enviar_requisicao(f"CONSULTAR|{ano}")
                 # self.enviar_requisicao(f"CONSULTAR {cpf} {ano}")
             elif opcao == "6":
                 self.enviar_requisicao(f'LISTAR')
@@ -75,7 +92,7 @@ class Cliente:
                 num_quarto = input('Qual o numero do quarto que dejesa adicionar: ')
                 preco = input('Valor do quarto: ') 
                 cama =  input('Quantidade de camas: ')
-                self.enviar_requisicao(f'ADICIONAR {num_quarto} {preco} {cama}')
+                self.enviar_requisicao(f'ADICIONAR|{num_quarto}|{preco}|{cama}')
 
             elif opcao == "8":
                 print("Encerrando conexão...")
