@@ -1,6 +1,6 @@
 import socket
 import sys
-from funcaoaleatoria import listaquarto
+from listaQuarto import listaquarto
 
 class Cliente:
     def __init__(self, host='127.0.0.1', porta=12345):
