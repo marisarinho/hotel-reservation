@@ -124,8 +124,12 @@ class Servidor:
                 elif comando[0] == "CANCELAR" and len(comando) >= 3:
                     # cpf, num_quarto, data_entrada = comando[1], int(comando[2]), comando[3]
                     _, num_quarto, data_entrada = comando
-                    if not isinstance(num_quarto,int):
+                    try:
+                        if not isinstance(int(num_quarto),int):
                             raise ErroDeReserva('quarto invalido')
+                    except Exception as e:
+                            raise ErroDeReserva('quarto invalido')
+                    
                     print('testando')
                     num_quarto = int(num_quarto) # declarando pra nao dar indefinido
                     try:
