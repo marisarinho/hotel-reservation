@@ -48,7 +48,7 @@ Numpy: (pip install numpy)<br>
 
 
 ## Protocolo da Aplicação:
-[Acesse aqui.](ttps://github.com/marisarinho/hotel-reservation/blob/main/hrcp.md)<br>
+[Acesse aqui.](https://github.com/marisarinho/hotel-reservation/blob/main/hrcp.md)<br>
 
 ## Instruções para Execução
 **Clone o repositório:**
