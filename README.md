@@ -17,7 +17,30 @@ Protocolos de Interconexão de Redes de Computadores | professor: Leonidas Franc
 ## Descrição do problema
 O projeto visa desenvolver um sistema de reserva de hotel que será executado no terminal, permitindo que múltiplos usuários realizem reservas simultaneamente. O sistema tem como objetivo oferecer uma solução eficiente e acessível para a gestão de reservas, garantindo a organização e controle das acomodações disponíveis no hotel.
 
+## Estrutura dos Arquivos do Projeto
 
+hrcp/<br>
+├── client/<br>
+│   ├── cliente.py  <br>
+│   └── listaQuarto.py<br>
+├── hrcp/<br>
+│   ├── cliente-server/<br>
+│   │   ├── __init__.py<br>
+├── server/<br>
+│   ├── estruturas/<br>
+│   │   ├── hashtable.py <br> 
+│   │   └── listaOrd.py <br>
+│   ├── exception.py  <br>
+│   ├── gerar_quartos.py  <br>
+│   ├── gerenciamento.py  <br>
+│   ├── hospede.py  <br>
+│   ├── quarto.py  <br>
+│   ├── reserva.py  <br>
+│   ├── servidor.py <br>
+│   └── tratarCorrida.py<br> 
+├── .gitignore<br>
+├── hrcp.md<br>
+└── README.md <br>
 
 
 ## Desenvolvedoras responsaveis pelo projeto
