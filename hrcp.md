@@ -15,7 +15,7 @@ Cada requisição enviada para o servidor deverá seguir a seguinte estrutura:<b
 Descrição: Permite que o usuário se cadastre no sistema. A requisição deve conter o CPF, nome, telefone e senha do usuário.<br>
 
 Exemplo de Requisição:<br>
-{<br>
+<!-- {<br>
   "method": "CADASTRAR",<br>
   "data": {<br>
     "cpf": "12345678900",<br>
@@ -23,30 +23,34 @@ Exemplo de Requisição:<br>
     "telefone": "987654321",<br>
     "senha": "senha123"<br>
   }<br>
-}<br>
+}<br> -->
+CADASTRAR|{cpf}|{nome}|{telefone}|{senha}
 Status de Resposta:<br>
 
 200: Hóspede cadastrado com sucesso.<br>
-400: Já está cadastrado.<br>
-401: Erro ao cadastrar.<br>
+401: Já está logado.<br>
+402: Cpf em uso. <br>
+403: Telefone com formato inválido.<br>
+405: Cpf inválido.<br>
 
 
 **2. LOGIN**<br>
 Descrição: Permite que o hóspede se autentique no sistema. A requisição deve conter o CPF e a senha do usuário.<br>
 
 Exemplo de Requisição:<br>
-{<br>
+<!-- {<br>
   "method": "LOGIN",<br>
   "data": {<br>
     "cpf": "12345678900",<br>
     "senha": "senha123"<br>
   }<br>
-}<br>
+}<br> -->
+LOGIN|{cpf}|{senha}
 Status de Resposta:<br>
 
-200: Hóspede logado com sucesso.<br>
-401: CPF ou senha incorretos.<br>
-402: Já está logado.<br>
+211: Hóspede logado com sucesso.<br>
+411: Já está logado.<br>
+412: CPF ou senha incorretos.<br>
 
 
 **3. RESERVAR**<br>
@@ -54,19 +58,23 @@ Descrição: Permite que o hóspede faça uma reserva de quarto no hotel. A requ
 
 Exemplo de Requisição:<br>
 
-{<br>
+<!-- {<br>
   "method": "RESERVAR",<br>
   "data": {<br>
     "num_quarto": 101,<br>
     "data_entrada": "2025-03-20",<br>
     "data_saida": "2025-03-25"<br>
   }<br>
-}<br>
+}<br> -->
+RESERVAR|{num_quarto}|{data_entrada}|{data_saida}
 Status de Resposta:<br>
 
-201: Reserva confirmada.<br>
-409: Quarto já reservado.<br>
-401: É necessário fazer login.<br>
+221: Reserva confirmada.<br>
+421: Precisa estar logado.<br>
+422: Hospede não encontrado.<br>
+423: Formato de data inválido.<br>
+424: Quarto não cadastrado.<br>
+425: O quarto já reservado <br>
 
 
 **4. CANCELAR**<br>
@@ -74,35 +82,38 @@ Descrição: Permite que o hóspede cancele uma reserva já feita. A requisiçã
 
 Exemplo de Requisição:<br>
 
-{<br>
+<!-- {<br>
   "method": "CANCELAR",<br>
   "data": {<br>
     "num_quarto": 101,<br>
     "data_entrada": "2025-03-20"<br>
   }<br>
-}<br>
+}<br> -->
+CANCELAR|{num_quarto}|{data_entrada}
 Status de Resposta:<br>
 
-200: Reserva cancelada com sucesso.<br>
-400: Reserva não encontrada.<br>
-401: É necessário fazer login.<br>
+231: Reserva cancelada com sucesso.<br>
+431: É necessário fazer login.<br>
+432: Reserva não encontrada.<br>
 
 
 **5. CONSULTAR**<br>
 Descrição: Permite que o hóspede consulte suas reservas feitas no hotel. A requisição deve conter o ano para filtrar as reservas.<br>
 
 Exemplo de Requisição:<br>
-{<br>
+<!-- {<br>
   "method": "CONSULTAR",<br>
   "data": {<br>
     "ano": 2025<br>
   }<br>
-}<br>
+}<br> -->
+CONSULTAR|{ano}
 Status de Resposta:<br>
 
-200: Reservas encontradas.<br>
-400: Não existem reservas para o ano solicitado.<br>
-401: É necessário fazer login.<br>
+241: Reservas encontradas.<br>
+441: É necessário fazer login.<br>
+442: Reservas não encontradas.<br>
+443: Hópede não encontrado. <br>
 
 
 **6. ADICIONAR**<br>
@@ -110,45 +121,49 @@ Descrição: Permite que o administrador adicione um novo quarto ao hotel. A req
 
 Exemplo de Requisição:<br>
 
-{<br>
+<!-- {<br>
   "method": "ADICIONAR",<br>
   "data": {<br>
     "num_quarto": 102,<br>
     "preco": 250.0,<br>
     "cama": "Queen"<br>
   }<br>
-}<br>
+}<br> -->
+ADICIONAR|{num_quarto}|{preco}|{cama}
 Status de Resposta:<br>
 
-200: Quarto adicionado com sucesso.<br>
-400: Erro ao adicionar quarto.<br>
+251: Quarto adicionado com sucesso.<br>
+451: Quarto já existe.<br>
+452: Formato inválido para quarto.<br>
 
 **7. LISTAR**<br>
 Descrição: Permite que o administrador liste todos os quartos disponíveis no hotel.<br>
 
 Exemplo de Requisição:<br>
 
-{<br>
+<!-- {<br>
   "method": "LISTAR",<br>
   "data": {}<br>
-}<br>
+}<br> -->
+LISTAR
 Status de Resposta:<br>
 
-200: Lista de quartos disponíveis.<br>
+261: Lista de quartos disponíveis.<br>
 
 **8. SAIR**<br>
 Descrição: Permite que o cliente encerre a conexão com o servidor.<br>
 
 Exemplo de Requisição:<br>
 
-{<br>
+<!-- {<br>
   "method": "SAIR",<br>
   "data": {}<br>
-}
+} -->
+SAIR
 Status de Resposta:
 <br>
-200: Conexão encerrada com sucesso.<br>
-400: Erro ao encerrar a conexão.<br>
+271: Conexão encerrada com sucesso.<br>
+470: Erro ao encerrar a conexão.<br>
 Erro de Requisição<br>
 0: Bad Request - Formato incorreto de requisição.<br>
 

@@ -4,21 +4,30 @@ from reserva import Reserva
 from estruturas.listaOrd import Lista
 from gerar_quartos import gerar_quartos
 from datetime import datetime
-from typing import Optional,List 
+from typing import Optional, List
 from quarto import Quarto
 from exception import ErroDeReserva
 from tratarCorrida import lock
 
+
 class GerenciadorReservas:
 
     def __init__(self):
-        self.__hospedes: HashTable[str, Hospede] = HashTable() # chave<cpf> : value <objeto Hospede>
-        self.__quartos: HashTable[str, Quarto] = HashTable() # chave<numero_quarto> : value <objeto Quarto>
-        self.__reservas: Lista[Reserva] = Lista()  # Lista ordenada para armazenar as reservas. A chave da reserva é a data de entrada
+        self.__hospedes: HashTable[str, Hospede] = (
+            HashTable()
+        )  # chave<cpf> : value <objeto Hospede>
+        self.__quartos: HashTable[str, Quarto] = (
+            HashTable()
+        )  # chave<numero_quarto> : value <objeto Quarto>
+        self.__reservas: Lista[Reserva] = (
+            Lista()
+        )  # Lista ordenada para armazenar as reservas. A chave da reserva é a data de entrada
         gerar_quartos(self.__quartos)
 
-    def realizar_reserva(self, cpf:str, num_quarto:int, data_entrada: str, data_saida: str) -> None:
-        '''
+    def realizar_reserva(
+        self, cpf: str, num_quarto: int, data_entrada: str, data_saida: str
+    ) -> None:
+        """
         Método que realiza a reserva de um quarto no período especificado.
 
         Parametros
@@ -34,34 +43,38 @@ class GerenciadorReservas:
 
         Raises
         -------------
-        ErroDeReserva: uma exceção quando o hospede não existir 
-        '''
+        ErroDeReserva: uma exceção quando o hospede não existir
+        """
         with lock:
             hospede = self.buscar_usuario(cpf)
             if not hospede:
-                raise ErroDeReserva(f'Hospede de cpf {cpf} não cadastrado')
-            
+                raise ErroDeReserva(f"422| Hospede não encontrado")
+
             try:
                 data_entrada = datetime.strptime(data_entrada, "%d/%m/%Y")
-                data_saida = datetime.strptime(data_saida, "%d/%m/%Y")  
+                data_saida = datetime.strptime(data_saida, "%d/%m/%Y")
             except ValueError:
-                raise ErroDeReserva("Formato inválido!")
-            
+                raise ErroDeReserva("423| Formato de data inválido!")
+
             try:
-                quarto = self.__quartos[num_quarto] 
-            except KeyError: # aqui temos uma exceção se a chave cpf não estive na hash de hospede
-                raise ErroDeReserva(f'Quarto {num_quarto} não cadastrado')
-  
-            nova_reserva = Reserva(quarto, data_entrada, data_saida, hospede)        
-        
+                quarto = self.__quartos[num_quarto]
+            except (
+                KeyError
+            ):  # aqui temos uma exceção se a chave cpf não estive na hash de hospede
+                raise ErroDeReserva(f"424| Quarto não cadastrado")
+
+            nova_reserva = Reserva(quarto, data_entrada, data_saida, hospede)
+
             for reserva in self.__reservas:
                 reserva: Reserva
                 if reserva.quarto == nova_reserva.quarto:
-                    if not (data_saida < reserva.data_entrada or data_entrada > reserva.data_saida):
-                        raise ErroDeReserva(
-                            f"O quarto {num_quarto} já está reservado de {reserva.data_entrada} a {reserva.data_saida}.")
+                    if not (
+                        data_saida < reserva.data_entrada
+                        or data_entrada > reserva.data_saida
+                    ):
+                        raise ErroDeReserva(f"425| O quarto já reservado.")
             self.__reservas.inserir(nova_reserva)
-        
+
     def add_hospede(self, cpf: str, nome: str, telefone: str, senha: str) -> None:
         """
         Método para adicionar um hóspede ao sistema.
@@ -78,22 +91,19 @@ class GerenciadorReservas:
         """
 
         if self.buscar_usuario(cpf) is not None:
-            raise ErroDeReserva("Hóspede com o mesmo CPF já cadastrado.")
-        
+            raise ErroDeReserva("402| Hóspede com o mesmo CPF já cadastrado.")
+
         if nome:
             for char in nome:
                 if char in "123456789":
-                    raise ErroDeReserva("Nome não pode conter números.")
-        
+                    raise ErroDeReserva("403| Telefone com formato inválido.")
+
         if not telefone.isdigit() or len(telefone) != 11:
-                raise ErroDeReserva("Telefone deve conter exatamente 11 dígitos numéricos.")
-            
-        
-            
+            raise ErroDeReserva("403| Telefone com formato inválido.")
+
         novo_hospede = Hospede(nome, cpf, telefone, senha)
         self.__hospedes[cpf] = novo_hospede
-        return
-            
+
     def adicionar_quarto(self, num_quarto: int, preco: float, camas: int) -> None:
         """
         Método para adicionar um novo quarto manualmente.
@@ -107,15 +117,15 @@ class GerenciadorReservas:
         Retorno:
         ------------
         None
-        
+
         Raises
         -------------
-        ErroDeReserva: uma exceção quando o quarto já existir 
+        ErroDeReserva: uma exceção quando o quarto já existir
         """
         with lock:
             if num_quarto in self.__quartos:
-                raise ErroDeReserva(f"O quarto {num_quarto} já existe.") 
-            
+                raise ErroDeReserva(f"451| O quarto já existe.")
+
             novo_quarto = Quarto(num_quarto, preco, camas)
             self.__quartos[num_quarto] = novo_quarto
 
@@ -125,16 +135,14 @@ class GerenciadorReservas:
             mensagem += f"Quarto {chave}: Nº {valor.num_quarto}, Preço: R${valor.preco}, Cama: {valor.camas}\n"
         return mensagem
 
-
     def mostrar_hospede(self):
         hospedes_lista = "Hospedes cadastrados:\n"
         for chave, valor in self.__hospedes.items():  # Se for um dicionário
             hospedes_lista += f"Hóspede {chave}: {valor}\n"
         return hospedes_lista
 
-    
-    def cancelar_reserva(self, cpf:str, num_quarto:int, data_entrada:datetime):
-        '''
+    def cancelar_reserva(self, cpf: str, num_quarto: int, data_entrada: datetime):
+        """
         Método que cancela uma reserva existente no período especificado.
 
         Parâmetros
@@ -152,32 +160,39 @@ class GerenciadorReservas:
         -------------
         ErroDeReserva: Exceção levantada quando o hóspede não possui reservas ou os
         dados fornecidos estão incorretos.
-        '''
-       
+        """
 
         try:
             data_entrada = datetime.strptime(data_entrada, "%d/%m/%Y")
-            print('aqui')
+            # print("aqui")
         except ValueError:
-                raise ErroDeReserva("Formato inválido!")
-            
+            raise ErroDeReserva("433| Formato inválido!")
+
         try:
-            quarto = self.__quartos[num_quarto] 
-        except KeyError: # aqui temos uma exceção se a chave cpf não estive na hash de hospede
-                raise ErroDeReserva(f'Quarto {num_quarto} não cadastrado')
+            self.__quartos[num_quarto]
+        except KeyError:
+            raise ErroDeReserva(f"432| Reserva não encontrada")
 
-        with lock:  
-            reservas_usuario = self.consultar_reserva(cpf, data_entrada.year)
-            for reserva in reservas_usuario:
-                if reserva.quarto.num_quarto == num_quarto and reserva.data_entrada == data_entrada:
-                    self.__reservas.remover(self.__reservas.busca(reserva))  
-                    return
-                
-            # raise ErroDeReserva("Reserva não encontrada ou dados incorretos.")
+        reservas_usuario = self.consultar_reserva(cpf, data_entrada.year)
+        if len(reservas_usuario) == 0:
+            raise ErroDeReserva(f"432| Reserva não encontrada")
 
+        # with lock:
 
-    def buscar_usuario(self, cpf:str) -> Optional[Hospede]: # Optional -> None ou [valor]
-        '''
+        for reserva in reservas_usuario:
+            if (
+                reserva.quarto.num_quarto == num_quarto
+                and reserva.data_entrada == data_entrada
+            ):
+                self.__reservas.remover(self.__reservas.busca(reserva))
+                return
+
+            raise ErroDeReserva("432| Reserva não encontrada")
+
+    def buscar_usuario(
+        self, cpf: str
+    ) -> Optional[Hospede]:  # Optional -> None ou [valor]
+        """
         Método que busca um hóspede pelo CPF.
 
         Parâmetros
@@ -187,17 +202,17 @@ class GerenciadorReservas:
         Retorno
         ------------
         Optional[Hospede]: Retorna o objeto Hospede se encontrado, senão retorna None.
-        '''
-        
+        """
+
         try:
-            return self.__hospedes[cpf]  
+            return self.__hospedes[cpf]
         except KeyError:
             return None
-        
+
     def consultar_reserva(self, cpf: str, ano: int) -> List[Reserva]:
-        '''
+        """
         Método que consulta todas as reservas associadas a um determinado CPF em um ano específico.
- 
+
         Parâmetros
         -----------
         cpf (str): O CPF do hóspede cujas reservas serão consultadas.
@@ -211,11 +226,12 @@ class GerenciadorReservas:
         Raises
         -------------
         Nenhuma exceção é levantada. Se o hóspede não for encontrado, uma lista vazia será retornada.
-        '''
-        
+        """
+
         # Filtra as reservas pelo ano e CPF
         reservas_filtradas = [
-            reserva for reserva in self.__reservas 
+            reserva
+            for reserva in self.__reservas
             if reserva.ano == ano and reserva.hospede.cpf == cpf
         ]
         return reservas_filtradas

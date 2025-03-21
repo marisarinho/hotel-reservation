@@ -5,7 +5,7 @@ class Hospede:
         self.__nome = nome
 
         if not self.__cpf_valido(cpf):
-            raise ErroDeReserva('CPF inválido')
+            raise ErroDeReserva('405| CPF inválido')
             
         self.__cpf = cpf
         self.__telefone = telefone

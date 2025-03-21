@@ -4,6 +4,7 @@ import sys
 from gerenciamento import GerenciadorReservas
 from exception import ErroDeReserva
 
+
 class Cliente:
     def __init__(self, socket: socket, address: tuple[str, int], nome="", cpf=""):
         self.socket = socket
@@ -18,8 +19,9 @@ class Cliente:
         """Verifica se o usuário está logado."""
         return self.nome != "" and self.cpf != ""
 
+
 class Servidor:
-    def __init__(self, host='0.0.0.0', porta=12345):
+    def __init__(self, host="0.0.0.0", porta=12345):
         self.host = host
         self.porta = porta
         self.gerenciador = GerenciadorReservas()
@@ -38,7 +40,9 @@ class Servidor:
                 print(f"Cliente conectado: {endereco}")
                 cliente = Cliente(conexao, endereco)
                 self.clients.append(cliente)
-                thread_cliente = threading.Thread(target=self.lidar_com_cliente, args=(cliente,))
+                thread_cliente = threading.Thread(
+                    target=self.lidar_com_cliente, args=(cliente,)
+                )
                 thread_cliente.start()
             except (OSError, KeyboardInterrupt):
                 break
@@ -50,9 +54,9 @@ class Servidor:
             try:
                 command = input()
             except EOFError:
-                command = 'q'
+                command = "q"
 
-            if command.strip().lower() == 'q':
+            if command.strip().lower() == "q":
                 print("Encerrando servidor...")
                 break
 
@@ -82,115 +86,127 @@ class Servidor:
                     _, cpf, nome, telefone, senha = comando
                     try:
                         if cliente.esta_logado():
-                            resposta ='400'
+                            resposta = "401| Já está logado"
                             # raise ErroDeReserva("Você já está cadastrado.")
-
-                        self.gerenciador.add_hospede(cpf, nome, telefone, senha)
-                        cliente.cpf = cpf
-                        cliente.nome = nome
-                        resposta = f"200"
+                        else:
+                            # pode gerar os erros (ja tem os codigos)
+                            self.gerenciador.add_hospede(cpf, nome, telefone, senha)
+                            # se nao der erro ele passa pra ca e a resposta é 201
+                            cliente.cpf = cpf
+                            cliente.nome = nome
+                            resposta = f"201| Hóspede cadastrado com sucesso"
                     except Exception as e:
-                        resposta = f"400" 
+                        # coloca a resposta pra ser o erro
+                        resposta = e.__str__()
                         print(self.gerenciador.mostrar_hospede())
-                    
 
                 elif comando[0] == "LOGIN" and len(comando) == 3:
                     _, cpf, senha = comando
                     hospede = self.gerenciador.buscar_usuario(cpf)
                     try:
                         if cliente.esta_logado():
-                           resposta = f'400'
+                            resposta = f"411| Já está logado"
 
-                        if not hospede or hospede.senha != senha:
-                            raise ErroDeReserva("CPF ou senha errados.")
-
-                        cliente.nome = hospede.nome
-                        cliente.cpf = cpf
-                        resposta = f"200"
+                        elif not hospede or hospede.senha != senha:
+                            raise ErroDeReserva("412| CPF ou senha errados.")
+                        else:
+                            cliente.nome = hospede.nome
+                            cliente.cpf = cpf
+                            resposta = f"211| Login efetuado"
                     except Exception as e:
-                        resposta = f"401"
+                        resposta = e.__str__()
 
                 elif comando[0] == "RESERVAR" and len(comando) == 4:
                     if not cliente.esta_logado():
-                        resposta = "401"
+                        resposta = f"421| Precisa estar logado"
                     else:
                         _, num_quarto, data_entrada, data_saida = comando
                         try:
-                            self.gerenciador.realizar_reserva(cliente.cpf, int(num_quarto), data_entrada, data_saida)
-                            resposta = f"201"
+                            self.gerenciador.realizar_reserva(
+                                cliente.cpf, int(num_quarto), data_entrada, data_saida
+                            )
+                            resposta = "221| Reserva realizada"
                         except ErroDeReserva as e:
-                            resposta = f"409| {str(e)}"
+                            resposta = e.__str__()
 
                 elif comando[0] == "CANCELAR" and len(comando) >= 3:
                     # cpf, num_quarto, data_entrada = comando[1], int(comando[2]), comando[3]
                     _, num_quarto, data_entrada = comando
-                    try:
-                        if not isinstance(int(num_quarto),int):
-                            raise ErroDeReserva('quarto invalido')
-                    except Exception as e:
-                            raise ErroDeReserva('quarto invalido')
-                    
-                    print('testando')
-                    num_quarto = int(num_quarto) # declarando pra nao dar indefinido
+
                     try:
                         if not cliente.esta_logado():
-                            raise ErroDeReserva("É necessário fazer login.")
-                    
-                        self.gerenciador.cancelar_reserva(cliente.cpf, num_quarto, data_entrada)
-                    
-                        resposta = f"200| Reserva do Quarto {num_quarto} para CPF {cliente.cpf} cancelada."
-                    except ErroDeReserva as e:
-                        resposta = f"400| {str(e)}"
+                            raise ErroDeReserva("431| Precisa estar logado.")
 
-                        
+                        if not num_quarto.isdigit():
+                            raise ErroDeReserva("432| Reserva não encontrada.")
+                        num_quarto = int(num_quarto)
+
+                        self.gerenciador.cancelar_reserva(
+                            cliente.cpf, int(num_quarto), data_entrada
+                        )
+
+                        resposta = f"231| Reserva cancelada."
+                    except ErroDeReserva as e:
+                        resposta = e.__str__()
 
                 elif comando[0] == "CONSULTAR" and len(comando) >= 2:
                     # cpf = comando[1]
-                    ano = int(comando[1])
-                    usuario = self.gerenciador.buscar_usuario(cliente.cpf)
-                    
+                    ano = comando[1]
                     try:
                         if not cliente.esta_logado():
-                            raise ErroDeReserva("É necessário fazer login.")
-                        
+                            raise ErroDeReserva("441| Precisa estar logado.")
+
+                        if not ano.isdigit():
+                            raise ErroDeReserva("442| Reservas não encontradas.")
+
+                        usuario = self.gerenciador.buscar_usuario(cliente.cpf)
+
                         if not usuario:
-                            raise ErroDeReserva("Hóspede não encontrado.")
-                        
-                        reservas = self.gerenciador.consultar_reserva(cliente.cpf, ano)
+                            raise ErroDeReserva("443| Hóspede não encontrado.")
+
+                        reservas = self.gerenciador.consultar_reserva(
+                            cliente.cpf, int(ano)
+                        )
                         if not reservas:
-                            raise ErroDeReserva(f"Usuário {usuario.nome} (CPF: {cliente.cpf}) está cadastrado, mas não possui reservas.")
-                        
-                    
-            
-                        resposta = f"200| Reservas para {usuario.nome} (CPF: {cliente.cpf}):\n"
+                            raise ErroDeReserva("442| Reservas não encontradas.")
+
+                        resposta = f"241| "
                         for reserva in reservas:
                             resposta += f"- Quarto {reserva.quarto.num_quarto}, Entrada: {reserva.data_entrada}, Saída: {reserva.data_saida}\n"
-                        
+
                     except ErroDeReserva as e:
-                        resposta  = f"400| Reserva não encontrada"
+                        resposta = e.__str__()
 
-                        mensagem = str(e.args[0])
-
-                elif comando[0] == "ADICIONAR" and len(comando)>=4:
+                elif comando[0] == "ADICIONAR" and len(comando) >= 4:
                     _, num_quarto, preco, cama = comando
-                    num_quarto = int(num_quarto)
-                    self.gerenciador.adicionar_quarto(num_quarto,preco,cama)
-                    resposta = f'({self.gerenciador.mostrar_quartos()}'
+                    try:
+                        if not num_quarto.isdigit():
+                            raise ErroDeReserva("452| Formato inválido para quarto.")
+                        
+                        self.gerenciador.adicionar_quarto(int(num_quarto), preco, cama)
+                        resposta = f"251| {self.gerenciador.mostrar_quartos()}"
+                    except Exception as e:
+                        resposta = e.__str__()
+
 
                 elif comando[0] == "LISTAR":
-                    resposta = f"200| {self.gerenciador.mostrar_quartos()}"
+                    resposta = f"261| {self.gerenciador.mostrar_quartos()}"
 
                 elif comando[0] == "SAIR":
-                    resposta = "200| Conexão encerrada pelo cliente."
-                    cliente.socket.send(resposta.encode())
-                    cliente.socket.close()
-                    self.clients.remove(cliente)
+                    resposta = "271| Conexão encerrada pelo cliente."
+                    try:
+                        cliente.socket.sendall(resposta.encode())
+                        cliente.socket.close()
+                        self.clients.remove(cliente)
+                    except Exception:
+                        resposta = "471| Erro ao encerrar a conexão"
                     return
 
-                cliente.socket.send(resposta.encode())
+                cliente.socket.sendall(resposta.encode())
 
             except Exception as e:
-                cliente.socket.send(f"500| Erro interno: {str(e)}".encode())
+                cliente.socket.sendall(f"500| Erro interno: {str(e)}".encode())
+
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
