@@ -108,7 +108,7 @@ class Servidor:
                         else:
                             cliente.nome = hospede.nome
                             cliente.cpf = cpf
-                            resposta = f"211| efetuadar login"
+                            resposta = f"211| efetuar login"
                     except Exception as e:
                         resposta = e.__str__()
 
