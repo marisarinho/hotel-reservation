@@ -137,7 +137,7 @@ class GerenciadorReservas:
 
     def mostrar_hospede(self):
         hospedes_lista = "Hospedes cadastrados:\n"
-        for chave, valor in self.__hospedes.items():  # Se for um dicionário
+        for chave, valor in self.__hospedes.items(): 
             hospedes_lista += f"Hóspede {chave}: {valor}\n"
         return hospedes_lista
 
