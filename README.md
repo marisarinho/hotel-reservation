@@ -80,10 +80,6 @@ hrcp/<br>
     <td>Define um lock global para evitar condições de corrida em operações concorrentes.</td>
   </tr>
   <tr>
-    <td><code>lista_quartos.py</code></td>
-    <td>Contém a função <code>listaquarto</code>, que processa e exibe informações sobre os quartos a partir de uma string formatada.</td>
-  </tr>
-  <tr>
     <td><code>estruturas/hashTable.py</code></td>
     <td>Implementa uma tabela hash para armazenar e gerenciar hóspedes e quartos de forma eficiente.</td>
   </tr>

@@ -1,6 +1,6 @@
 import socket
 import sys
-from listaQuarto import listaquarto
+
 
 
 class Cliente:

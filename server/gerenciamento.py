@@ -60,7 +60,7 @@ class GerenciadorReservas:
                 quarto = self.__quartos[num_quarto]
             except (
                 KeyError
-            ):  # aqui temos uma exceção se a chave cpf não estive na hash de hospede
+            ):  
                 raise ErroDeReserva(f"424| Quarto não cadastrado")
 
             nova_reserva = Reserva(quarto, data_entrada, data_saida, hospede)
@@ -96,7 +96,7 @@ class GerenciadorReservas:
         if nome:
             for char in nome:
                 if char in "123456789":
-                    raise ErroDeReserva("403| Telefone com formato inválido.")
+                    raise ErroDeReserva("403| Nome com formato inválido.")
 
         if not telefone.isdigit() or len(telefone) != 11:
             raise ErroDeReserva("403| Telefone com formato inválido.")
@@ -130,7 +130,7 @@ class GerenciadorReservas:
             self.__quartos[num_quarto] = novo_quarto
 
     def mostrar_quartos(self):
-        mensagem = "Quartos cadastrados:\n"
+        mensagem = "listar quartos cadastrados:\n"
         for chave, valor in self.__quartos.items():
             mensagem += f"Quarto {chave}: Nº {valor.num_quarto}, Preço: R${valor.preco}, Cama: {valor.camas}\n"
         return mensagem
@@ -164,7 +164,6 @@ class GerenciadorReservas:
 
         try:
             data_entrada = datetime.strptime(data_entrada, "%d/%m/%Y")
-            # print("aqui")
         except ValueError:
             raise ErroDeReserva("433| Formato inválido!")
 
@@ -177,17 +176,17 @@ class GerenciadorReservas:
         if len(reservas_usuario) == 0:
             raise ErroDeReserva(f"432| Reserva não encontrada")
 
-        # with lock:
+        with lock:
 
-        for reserva in reservas_usuario:
-            if (
-                reserva.quarto.num_quarto == num_quarto
-                and reserva.data_entrada == data_entrada
-            ):
-                self.__reservas.remover(self.__reservas.busca(reserva))
-                return
+            for reserva in reservas_usuario:
+                if (
+                    reserva.quarto.num_quarto == num_quarto
+                    and reserva.data_entrada == data_entrada
+                ):
+                    self.__reservas.remover(self.__reservas.busca(reserva))
+                    return
 
-            raise ErroDeReserva("432| Reserva não encontrada")
+                raise ErroDeReserva("432| Reserva não encontrada")
 
     def buscar_usuario(
         self, cpf: str

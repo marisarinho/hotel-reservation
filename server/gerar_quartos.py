@@ -1,7 +1,7 @@
 from quarto import Quarto
 from estruturas.hashTable import HashTable
 
-def gerar_quartos(hash_table: HashTable, quantidade: int=3) -> None:
+def gerar_quartos(hash_table: HashTable, quantidade: int=12) -> None:
     """ 
     Função para gerar quartos em uma hashtable
 

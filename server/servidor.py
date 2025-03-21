@@ -82,21 +82,17 @@ class Servidor:
 
                 resposta = "400| Comando inválido"
 
-                if comando[0] == "CADASTRAR" and len(comando) == 5:
+                if comando[0] == "CADASTRAR" and len(comando) >= 5:
                     _, cpf, nome, telefone, senha = comando
                     try:
                         if cliente.esta_logado():
                             resposta = "401| Já está logado"
-                            # raise ErroDeReserva("Você já está cadastrado.")
                         else:
-                            # pode gerar os erros (ja tem os codigos)
                             self.gerenciador.add_hospede(cpf, nome, telefone, senha)
-                            # se nao der erro ele passa pra ca e a resposta é 201
                             cliente.cpf = cpf
                             cliente.nome = nome
-                            resposta = f"201| Hóspede cadastrado com sucesso"
+                            resposta = f"211| cadastrar hóspede"
                     except Exception as e:
-                        # coloca a resposta pra ser o erro
                         resposta = e.__str__()
                         print(self.gerenciador.mostrar_hospede())
 
@@ -112,7 +108,7 @@ class Servidor:
                         else:
                             cliente.nome = hospede.nome
                             cliente.cpf = cpf
-                            resposta = f"211| Login efetuado"
+                            resposta = f"211| efetuadar login"
                     except Exception as e:
                         resposta = e.__str__()
 
@@ -125,12 +121,11 @@ class Servidor:
                             self.gerenciador.realizar_reserva(
                                 cliente.cpf, int(num_quarto), data_entrada, data_saida
                             )
-                            resposta = "221| Reserva realizada"
+                            resposta = "221| realizar reserva"
                         except ErroDeReserva as e:
                             resposta = e.__str__()
 
                 elif comando[0] == "CANCELAR" and len(comando) >= 3:
-                    # cpf, num_quarto, data_entrada = comando[1], int(comando[2]), comando[3]
                     _, num_quarto, data_entrada = comando
 
                     try:
@@ -145,12 +140,11 @@ class Servidor:
                             cliente.cpf, int(num_quarto), data_entrada
                         )
 
-                        resposta = f"231| Reserva cancelada."
+                        resposta = f"231| cancelar reserva"
                     except ErroDeReserva as e:
                         resposta = e.__str__()
 
                 elif comando[0] == "CONSULTAR" and len(comando) >= 2:
-                    # cpf = comando[1]
                     ano = comando[1]
                     try:
                         if not cliente.esta_logado():
