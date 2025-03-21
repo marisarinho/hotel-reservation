@@ -42,6 +42,58 @@ hrcp/<br>
 ├── hrcp.md<br>
 └── README.md <br>
 
+<table>
+  <tr>
+    <th>Arquivo</th>
+    <th>Responsabilidade</th>
+  </tr>
+  <tr>
+    <td><code>cliente.py</code></td>
+    <td>Atua como cliente do sistema de reservas. Estabelece conexão com o servidor, envia requisições e processa respostas. Possui um menu interativo para cadastro, login, reserva, cancelamento e consulta de quartos.</td>
+  </tr>
+  <tr>
+    <td><code>gerenciamento.py</code></td>
+    <td>Gerencia as operações principais, como cadastro de hóspedes, gerenciamento de quartos e manipulação de reservas.</td>
+  </tr>
+  <tr>
+    <td><code>servidor.py</code></td>
+    <td>Implementa o servidor que gerencia conexões via sockets, processa operações no GerenciadorReservas e retorna códigos de status.</td>
+  </tr>
+  <tr>
+    <td><code>hospede.py</code></td>
+    <td>Define a classe <code>Hospede</code>, representando um hóspede do sistema. Valida CPF e protege atributos com encapsulamento.</td>
+  </tr>
+  <tr>
+    <td><code>quarto.py</code></td>
+    <td>Define a classe <code>Quarto</code>, armazenando número, preço e quantidade de camas. Permite comparações entre quartos pelo número.</td>
+  </tr>
+  <tr>
+    <td><code>reserva.py</code></td>
+    <td>Define a classe <code>Reserva</code>, armazenando informações sobre o quarto, datas de entrada/saída e hóspede associado.</td>
+  </tr>
+  <tr>
+    <td><code>gerar_quarto.py</code></td>
+    <td>Contém a função <code>gerar_quartos</code>, que cria e adiciona automaticamente quartos na HashTable.</td>
+  </tr>
+  <tr>
+    <td><code>tratar_corrida.py</code></td>
+    <td>Define um lock global para evitar condições de corrida em operações concorrentes.</td>
+  </tr>
+  <tr>
+    <td><code>lista_quartos.py</code></td>
+    <td>Contém a função <code>listaquarto</code>, que processa e exibe informações sobre os quartos a partir de uma string formatada.</td>
+  </tr>
+  <tr>
+    <td><code>estruturas/hashTable.py</code></td>
+    <td>Implementa uma tabela hash para armazenar e gerenciar hóspedes e quartos de forma eficiente.</td>
+  </tr>
+  <tr>
+    <td><code>estruturas/listaOrd.py</code></td>
+    <td>Implementa uma lista ordenada encadeada para armazenar reservas, mantendo-as organizadas por data de entrada.</td>
+  </tr>
+</table>
+
+
 ## Pré-Requisitos para Execução 
 Python: Versão 3.11 <br>
 Numpy: (pip install numpy)<br>
