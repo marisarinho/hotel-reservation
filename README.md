@@ -1,6 +1,6 @@
 
 
-# Sistema de reserva do hotel Check-In Dreams
+# Sistema de reserva de hotel 
 #### O projeto consiste no desenvolvimento de um sistema de reserva de hotel, utilizando um modelo cliente-servidor para gerenciar reservas de quartos de forma eficiente.
 
 
